@@ -19,3 +19,10 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 .env
+
+# NPM files
+package.json
+package-lock.json
+vite.config.js
+node_modules
+public/build
