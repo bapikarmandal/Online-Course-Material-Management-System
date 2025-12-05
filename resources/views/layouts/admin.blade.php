@@ -190,6 +190,9 @@
         <a href="{{ route('admin.institutes') }}" class="{{ request()->routeIs('admin.institutes') ? 'active' : '' }}">
             <i class="fas fa-university"></i> Institutes
         </a>
+        <a href="{{ route('admin.departments') }}" class="{{ request()->routeIs('admin.departments') ? 'active' : '' }}">
+            <i class="fas fa-building"></i> Departments
+        </a>
         <a href="{{ route('home') }}" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
             <i class="fas fa-home"></i> Back to Site
         </a>

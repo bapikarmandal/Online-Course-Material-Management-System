@@ -4,15 +4,16 @@
 @section('page-title', 'Manage Materials')
 
 @section('content')
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0; color: #333;">All Materials</h2>
-        <button class="btn-primary modal-trigger" data-modal="addMaterialModal">
-            <i class="fas fa-plus"></i> Upload Material
-        </button>
-    </div>
+<div class="main-content">
+    <div class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #333;">All Materials</h2>
+            <button class="btn-primary modal-trigger" data-modal="addMaterialModal">
+                <i class="fas fa-plus"></i> Upload Material
+            </button>
+        </div>
 
-    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
                 <th style="padding: 12px; text-align: left;">ID</th>
@@ -55,8 +56,14 @@
                     </td>
                 </tr>
             @endforeach
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center;">
+            {{ $materials->links() }}
+        </div>
+    </div>
 </div>
 
 <!-- Add Material Modal -->

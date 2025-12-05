@@ -49,5 +49,10 @@
             @endforeach
         </tbody>
     </table>
+    
+    <!-- Pagination -->
+    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center;">
+        {{ $users->links() }}
+    </div>
 </div>
 @endsection

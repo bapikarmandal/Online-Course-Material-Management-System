@@ -40,7 +40,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/institutes', [AdminController::class, 'institutes'])->name('institutes');
         Route::post('/institutes', [AdminController::class, 'storeInstitute'])->name('institutes.store');
+        Route::get('/departments', [AdminController::class, 'departments'])->name('departments');
         Route::post('/departments', [AdminController::class, 'storeDepartment'])->name('departments.store');
+        Route::put('/departments/{department}', [AdminController::class, 'updateDepartment'])->name('departments.update');
+        Route::delete('/departments/{department}', [AdminController::class, 'deleteDepartment'])->name('departments.destroy');
         Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
     });
 });

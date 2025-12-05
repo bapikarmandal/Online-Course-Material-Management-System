@@ -25,7 +25,9 @@ class AdminController extends Controller
 
     public function materials()
     {
-        $materials = Material::with(['institute', 'department', 'uploader'])->latest()->get();
+        $materials = Material::with(['institute', 'department', 'uploader'])
+            ->latest()
+            ->get();
         return view('admin.materials', compact('materials'));
     }
 
@@ -37,7 +39,11 @@ class AdminController extends Controller
 
     public function institutes()
     {
-        $institutes = Institute::with('departments')->withCount('departments')->withCount('materials')->latest()->get();
+        $institutes = Institute::with('departments')
+            ->withCount('departments')
+            ->withCount('materials')
+            ->latest()
+            ->get();
         return view('admin.institutes', compact('institutes'));
     }
 
@@ -58,11 +64,25 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'institute_id' => ['required', 'exists:institutes,id'],
+            'description' => ['nullable', 'string'],
         ]);
 
         Department::create($validated);
 
         return redirect()->back()->with('success', 'Department created successfully!');
+    }
+
+    public function updateDepartment(Request $request, Department $department)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'institute_id' => ['required', 'exists:institutes,id'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        $department->update($validated);
+
+        return redirect()->back()->with('success', 'Department updated successfully!');
     }
 
     public function deleteUser(User $user)
@@ -73,5 +93,27 @@ class AdminController extends Controller
 
         $user->delete();
         return redirect()->back()->with('success', 'User deleted successfully!');
+    }
+
+    public function departments()
+    {
+        $departments = Department::with(['institute', 'materials'])
+            ->withCount('materials')
+            ->latest()
+            ->get();
+        
+        $institutes = Institute::all();
+        
+        return view('admin.departments', compact('departments', 'institutes'));
+    }
+
+    public function deleteDepartment(Department $department)
+    {
+        if ($department->materials()->exists()) {
+            return redirect()->back()->with('error', 'Cannot delete department that has associated materials!');
+        }
+
+        $department->delete();
+        return redirect()->back()->with('success', 'Department deleted successfully!');
     }
 }
