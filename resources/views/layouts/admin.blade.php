@@ -20,6 +20,8 @@
             top: 0;
             padding-top: 20px;
             transition: all 0.3s;
+            z-index: 100;
+            overflow-y: auto;
         }
         .sidebar a {
             color: white;
@@ -37,6 +39,8 @@
             padding: 20px;
             background: #f5f7fa;
             min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
         .top-bar {
             background: white;
@@ -46,6 +50,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            z-index: 10;
         }
         .card {
             background: white;
@@ -53,6 +59,8 @@
             padding: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
         .btn-primary {
             background: #667eea;
@@ -91,6 +99,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
         }
         .modal-content {
             background-color: white;
@@ -98,8 +107,26 @@
             padding: 30px;
             border-radius: 10px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            scroll-behavior: smooth;
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
         .close {
             color: #aaa;
@@ -230,15 +257,18 @@
             $('.modal-trigger').click(function() {
                 var modalId = $(this).data('modal');
                 $('#' + modalId).show();
+                $('body').css('overflow', 'hidden'); // Prevent body scroll
             });
 
             $('.close-modal').click(function() {
                 $(this).closest('.modal').hide();
+                $('body').css('overflow', ''); // Restore body scroll
             });
 
             $(window).click(function(event) {
                 if ($(event.target).hasClass('modal')) {
                     $('.modal').hide();
+                    $('body').css('overflow', ''); // Restore body scroll
                 }
             });
         });
