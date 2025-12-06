@@ -174,7 +174,7 @@
 
 <!-- Edit Department Modal -->
 <div id="editDepartmentModal" class="modal">
-    <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; position: relative;">
+    <div class="modal-content" style="max-width: 600px;">
         <span class="close close-modal" style="position: absolute; right: 20px; top: 10px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
         <h2 style="margin-top: 0; color: #333; padding-right: 30px;">Edit Department</h2>
         <form id="editDepartmentForm" method="POST" style="margin-top: 20px;">
@@ -213,7 +213,26 @@
     </div>
 </div>
 
-@push('scripts')
+@push('styles')
+<style>
+    .btn-edit:hover {
+        background: #2980b9 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+    }
+    .btn-danger:hover {
+        background: #c0392b !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+    }
+    .btn-edit:active,
+    .btn-danger:active {
+        transform: translateY(0);
+    }
+</style>
+@endpush
+
+@section('scripts')
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
@@ -221,60 +240,6 @@
 
 <script>
     $(document).ready(function() {
-        // Handle edit button clicks - use event delegation for DataTables compatibility
-        // Event delegation works even with dynamically created DataTables rows
-        $(document).on('click', '.btn-edit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            
-            console.log('Edit button clicked');
-            
-            // Get the department data from the button's data attributes
-            const $button = $(this);
-            const departmentId = $button.data('id');
-            const departmentName = $button.data('name');
-            const instituteId = $button.data('institute-id');
-            const description = $button.data('description');
-            
-            console.log('Department data:', {departmentId, departmentName, instituteId, description});
-            
-            // Validate data
-            if (!departmentId) {
-                console.error('Department ID is missing!');
-                alert('Error: Department ID is missing. Please refresh the page.');
-                return false;
-            }
-            
-            // Set the form values
-            $('#edit_name').val(departmentName || '');
-            $('#edit_institute_id').val(instituteId || '');
-            $('#edit_description').val(description || '');
-            
-            // Set the form action
-            $('#editDepartmentForm').attr('action', '/admin/departments/' + departmentId);
-            
-            // Show the modal - ensure it's visible
-            const $modal = $('#editDepartmentModal');
-            if ($modal.length === 0) {
-                console.error('Edit modal not found!');
-                alert('Edit modal not found. Please refresh the page.');
-                return false;
-            }
-            
-            // Show modal with explicit display
-            $modal.css({
-                'display': 'block',
-                'z-index': '9999',
-                'visibility': 'visible',
-                'opacity': '1'
-            });
-            $('body').css('overflow', 'hidden');
-            
-            console.log('Modal displayed, current display:', $modal.css('display'));
-            
-            return false;
-        });
         // Initialize DataTable with export buttons
         $('.data-table').DataTable({
             dom: 'Bfrtip',
@@ -303,48 +268,42 @@
             }
         });
 
-        // Close modal when clicking on X or Cancel button
-        $(document).on('click', '.close, .close-modal, .btn-danger.close-modal', function(e) {
+        // Handle edit button clicks using event delegation (works with DataTables)
+        $(document).on('click', '.btn-edit', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            const $modal = $(this).closest('.modal');
-            console.log('Close button clicked, hiding modal:', $modal[0]);
+            const $button = $(this);
+            const departmentId = $button.data('id');
+            const departmentName = $button.data('name');
+            const instituteId = $button.data('institute-id');
+            const description = $button.data('description') || '';
             
-            $modal.fadeOut(200, function() {
-                $('body').css('overflow', 'auto');
+            $('#edit_name').val(departmentName);
+            $('#edit_institute_id').val(instituteId);
+            $('#edit_description').val(description);
+            $('#editDepartmentForm').attr('action', '/admin/departments/' + departmentId);
+            
+            $('#editDepartmentModal').css({
+                'display': 'block',
+                'z-index': '9999'
             });
-            
-            return false;
+            $('body').css('overflow', 'hidden');
+        });
+
+        // Close modal handlers
+        $(document).on('click', '.close-modal', function() {
+            $('.modal').hide();
+            $('body').css('overflow', '');
         });
         
         // Close modal when clicking outside
-        $(document).on('click', '.modal', function(e) {
-            if (e.target === this) {
-                hideModal($(this).attr('id'));
+        $(document).on('click', '.modal', function(event) {
+            if ($(event.target).hasClass('modal')) {
+                $(this).hide();
+                $('body').css('overflow', '');
             }
         });
-        
-        // Prevent modal from closing when clicking inside modal content
-        $(document).on('click', '.modal-content', function(e) {
-            e.stopPropagation();
-        });
-        
-        // Function to show modal (kept for backward compatibility)
-        function showModal(modalId) {
-            const $modal = $('#' + modalId);
-            console.log('showModal called for:', modalId, 'Element:', $modal[0]);
-            $modal.css('display', 'block');
-            $modal.fadeIn(200);
-            $('body').css('overflow', 'hidden');
-        }
-        
-        // Function to hide modal
-        function hideModal(modalId) {
-            $('#' + modalId).fadeOut(200, function() {
-                $('body').css('overflow', 'auto');
-            });
-        }
     });
 </script>
-@endpush
+@endsection

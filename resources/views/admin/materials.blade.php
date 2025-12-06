@@ -45,14 +45,27 @@
                     <td style="padding: 12px;">{{ $material->downloads }}</td>
                     <td style="padding: 12px;">{{ $material->created_at->format('M d, Y') }}</td>
                     <td style="padding: 12px;">
-                        <form action="{{ route('materials.destroy', $material) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Are you sure you want to delete this material?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-danger" style="font-size: 12px;">
-                                <i class="fas fa-trash"></i> Delete
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <button type="button" class="btn-edit-material"
+                                    data-id="{{ $material->id }}" 
+                                    data-name="{{ $material->name }}"
+                                    data-institute-id="{{ $material->institute_id }}"
+                                    data-department-id="{{ $material->department_id }}"
+                                    data-semester="{{ $material->semester }}"
+                                    data-description="{{ $material->description ?? '' }}"
+                                    style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.3s; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-edit"></i> Edit
                             </button>
-                        </form>
+                            <form action="{{ route('admin.materials.delete', $material) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Are you sure you want to delete this material? This action cannot be undone.');"
+                                  style="margin: 0;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-danger" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.3s; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @endforeach
@@ -119,37 +132,187 @@
     </div>
 </div>
 
+<!-- Edit Material Modal -->
+<div id="editMaterialModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="close close-modal">&times;</span>
+        <h2 style="margin-top: 0; color: #333;">Edit Material</h2>
+        <form id="editMaterialForm" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+                <label for="edit_material_name">Material Name *</label>
+                <input type="text" name="name" id="edit_material_name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_material_institute_id">Institute *</label>
+                <select name="institute_id" id="edit_material_institute_id" required>
+                    <option value="">Select Institute</option>
+                    @foreach(\App\Models\Institute::with('departments')->get() as $institute)
+                        <option value="{{ $institute->id }}">{{ $institute->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit_material_department_id">Department *</label>
+                <select name="department_id" id="edit_material_department_id" required>
+                    <option value="">Select Department</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit_material_semester">Semester *</label>
+                <select name="semester" id="edit_material_semester" required>
+                    <option value="">Select Semester</option>
+                    @for($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}">Semester {{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit_material_file">File (Optional - Leave empty to keep current file)</label>
+                <input type="file" name="file" id="edit_material_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
+                <small style="color: #666;">PDF, DOC, DOCX, PPT, PPTX, TXT - Max 10MB</small>
+            </div>
+            <div class="form-group">
+                <label for="edit_material_description">Description</label>
+                <textarea name="description" id="edit_material_description" rows="3"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-danger close-modal">Cancel</button>
+                <button type="submit" class="btn-primary">Update Material</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('styles')
+<style>
+    .btn-edit-material:hover {
+        background: #2980b9 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+    }
+    .btn-danger:hover {
+        background: #c0392b !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+    }
+    .btn-edit-material:active,
+    .btn-danger:active {
+        transform: translateY(0);
+    }
+</style>
+@endpush
+
 @section('scripts')
 <script>
-    // Load departments based on selected institute in modal
-    document.getElementById('modal_institute_id').addEventListener('change', function() {
-        const instituteId = this.value;
-        const departmentSelect = document.getElementById('modal_department_id');
-        
-        departmentSelect.innerHTML = '<option value="">Select Department</option>';
-        
-        if (instituteId) {
-            fetch(`/api/departments?institute_id=${instituteId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(dept => {
-                        const option = document.createElement('option');
-                        option.value = dept.id;
-                        option.textContent = dept.name;
-                        departmentSelect.appendChild(option);
+    $(document).ready(function() {
+        // Load departments based on selected institute in add modal
+        $('#modal_institute_id').on('change', function() {
+            const instituteId = this.value;
+            const departmentSelect = $('#modal_department_id');
+            
+            departmentSelect.html('<option value="">Select Department</option>');
+            
+            if (instituteId) {
+                fetch(`/api/departments?institute_id=${instituteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(dept => {
+                            departmentSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading departments:', error);
                     });
-                })
-                .catch(error => {
-                    console.error('Error loading departments:', error);
-                });
-        }
-    });
+            }
+        });
 
-    // Handle form submission - show loading state
-    document.getElementById('materialForm').addEventListener('submit', function(e) {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-        submitBtn.disabled = true;
+        // Load departments based on selected institute in edit modal
+        $('#edit_material_institute_id').on('change', function() {
+            const instituteId = this.value;
+            const departmentSelect = $('#edit_material_department_id');
+            
+            departmentSelect.html('<option value="">Select Department</option>');
+            
+            if (instituteId) {
+                fetch(`/api/departments?institute_id=${instituteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(dept => {
+                            departmentSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading departments:', error);
+                    });
+            }
+        });
+
+        // Handle edit button clicks using event delegation (works with DataTables)
+        $(document).on('click', '.btn-edit-material', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const $button = $(this);
+            const materialId = $button.data('id');
+            const materialName = $button.data('name');
+            const instituteId = $button.data('institute-id');
+            const departmentId = $button.data('department-id');
+            const semester = $button.data('semester');
+            const description = $button.data('description') || '';
+            
+            $('#edit_material_name').val(materialName);
+            $('#edit_material_institute_id').val(instituteId);
+            $('#edit_material_semester').val(semester);
+            $('#edit_material_description').val(description);
+            $('#editMaterialForm').attr('action', '/admin/materials/' + materialId);
+            
+            // Load departments for the selected institute
+            const departmentSelect = $('#edit_material_department_id');
+            departmentSelect.html('<option value="">Select Department</option>');
+            
+            if (instituteId) {
+                fetch(`/api/departments?institute_id=${instituteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(dept => {
+                            const selected = (dept.id == departmentId) ? 'selected' : '';
+                            departmentSelect.append(`<option value="${dept.id}" ${selected}>${dept.name}</option>`);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading departments:', error);
+                    });
+            }
+            
+            $('#editMaterialModal').css({
+                'display': 'block',
+                'z-index': '9999'
+            });
+            $('body').css('overflow', 'hidden');
+        });
+
+        // Handle form submission - show loading state
+        $('#materialForm').on('submit', function(e) {
+            const submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Uploading...');
+            submitBtn.prop('disabled', true);
+        });
+
+        // Close modal handlers (already in layout, but ensure they work)
+        $(document).on('click', '.close-modal', function() {
+            $('.modal').hide();
+            $('body').css('overflow', '');
+        });
+        
+        // Close modal when clicking outside
+        $(document).on('click', '.modal', function(event) {
+            if ($(event.target).hasClass('modal')) {
+                $(this).hide();
+                $('body').css('overflow', '');
+            }
+        });
     });
 </script>
 @endsection

@@ -27,13 +27,13 @@ class AdminController extends Controller
     {
         $materials = Material::with(['institute', 'department', 'uploader'])
             ->latest()
-            ->get();
+            ->paginate(25);
         return view('admin.materials', compact('materials'));
     }
 
     public function users()
     {
-        $users = User::latest()->get();
+        $users = User::latest()->paginate(25);
         return view('admin.users', compact('users'));
     }
 
@@ -43,7 +43,7 @@ class AdminController extends Controller
             ->withCount('departments')
             ->withCount('materials')
             ->latest()
-            ->get();
+            ->paginate(25);
         return view('admin.institutes', compact('institutes'));
     }
 
@@ -115,5 +115,93 @@ class AdminController extends Controller
 
         $department->delete();
         return redirect()->back()->with('success', 'Department deleted successfully!');
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        if ($user->isAdmin() && $user->id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Cannot edit other admin users!');
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'role' => ['required', 'in:admin,faculty,student'],
+        ]);
+
+        // Prevent changing own role from admin
+        if ($user->id === auth()->id() && $validated['role'] !== 'admin') {
+            return redirect()->back()->with('error', 'Cannot change your own role from admin!');
+        }
+
+        $user->update($validated);
+        return redirect()->back()->with('success', 'User updated successfully!');
+    }
+
+    public function updateInstitute(Request $request, Institute $institute)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        $institute->update($validated);
+        return redirect()->back()->with('success', 'Institute updated successfully!');
+    }
+
+    public function deleteInstitute(Institute $institute)
+    {
+        if ($institute->departments()->exists()) {
+            return redirect()->back()->with('error', 'Cannot delete institute that has associated departments!');
+        }
+
+        if ($institute->materials()->exists()) {
+            return redirect()->back()->with('error', 'Cannot delete institute that has associated materials!');
+        }
+
+        $institute->delete();
+        return redirect()->back()->with('success', 'Institute deleted successfully!');
+    }
+
+    public function updateMaterial(Request $request, Material $material)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'institute_id' => ['required', 'exists:institutes,id'],
+            'department_id' => ['required', 'exists:departments,id'],
+            'semester' => ['required', 'integer', 'min:1', 'max:12'],
+            'description' => ['nullable', 'string'],
+            'file' => ['nullable', 'file', 'max:10240', 'mimes:pdf,doc,docx,ppt,pptx,txt'],
+        ]);
+
+        // Update file if provided
+        if ($request->hasFile('file')) {
+            // Delete old file
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($material->file_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($material->file_path);
+            }
+
+            $file = $request->file('file');
+            $filePath = $file->store('materials', 'public');
+
+            $validated['file_path'] = $filePath;
+            $validated['file_name'] = $file->getClientOriginalName();
+            $validated['file_type'] = $file->getClientMimeType();
+            $validated['file_size'] = $file->getSize();
+        }
+
+        $material->update($validated);
+        return redirect()->back()->with('success', 'Material updated successfully!');
+    }
+
+    public function deleteMaterial(Material $material)
+    {
+        // Delete the file from storage
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($material->file_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($material->file_path);
+        }
+
+        $material->delete();
+        return redirect()->back()->with('success', 'Material deleted successfully!');
     }
 }
