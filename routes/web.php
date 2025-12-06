@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FacultyController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -35,6 +36,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/materials/{material}', [MaterialController::class, 'show'])->name('materials.show');
     Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
     
+    // Faculty routes
+    Route::middleware('role:faculty')->prefix('faculty')->name('faculty.')->group(function () {
+        Route::get('/dashboard', [FacultyController::class, 'dashboard'])->name('dashboard');
+        Route::get('/materials/create', [FacultyController::class, 'create'])->name('materials.create');
+        Route::post('/materials', [FacultyController::class, 'store'])->name('materials.store');
+        Route::get('/materials/{material}/edit', [FacultyController::class, 'edit'])->name('materials.edit');
+        Route::put('/materials/{material}', [FacultyController::class, 'update'])->name('materials.update');
+        Route::delete('/materials/{material}', [FacultyController::class, 'destroy'])->name('materials.destroy');
+    });
+
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');

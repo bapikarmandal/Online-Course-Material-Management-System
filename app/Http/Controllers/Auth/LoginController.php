@@ -29,6 +29,10 @@ class LoginController extends Controller
                 return redirect()->route('admin.dashboard');
             }
 
+            if ($user->isFaculty()) {
+                return redirect()->route('faculty.dashboard');
+            }
+
             return redirect()->intended(route('home'));
         }
 

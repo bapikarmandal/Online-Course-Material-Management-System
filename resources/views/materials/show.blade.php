@@ -52,6 +52,17 @@
             </a>
             @auth
                 @if(auth()->user()->isAdmin() || auth()->user()->id == $material->uploaded_by)
+                    @if(auth()->user()->isFaculty() && auth()->user()->id == $material->uploaded_by)
+                        <a href="{{ route('faculty.dashboard') }}" 
+                           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Edit Material
+                        </a>
+                    @elseif(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.materials') }}" 
+                           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Edit Material
+                        </a>
+                    @endif
                     <form action="{{ route('materials.destroy', $material) }}" method="POST" class="inline" 
                           onsubmit="return confirm('Are you sure you want to delete this material?');">
                         @csrf
