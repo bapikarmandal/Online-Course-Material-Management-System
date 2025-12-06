@@ -23,15 +23,17 @@ Route::middleware('auth')->group(function () {
     
     // Material routes
     Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
-    Route::get('/materials/{material}', [MaterialController::class, 'show'])->name('materials.show');
-    Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
     
-    // Upload routes (Faculty and Admin only)
+    // Upload routes (Faculty and Admin only) - Must come before /materials/{material} route
     Route::middleware('role:faculty,admin')->group(function () {
         Route::get('/materials/create', [MaterialController::class, 'create'])->name('materials.create');
         Route::post('/materials', [MaterialController::class, 'store'])->name('materials.store');
         Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
     });
+    
+    // Material detail routes (must come after /materials/create)
+    Route::get('/materials/{material}', [MaterialController::class, 'show'])->name('materials.show');
+    Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
     
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {

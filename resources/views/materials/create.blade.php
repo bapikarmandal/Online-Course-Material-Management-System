@@ -12,14 +12,20 @@
             
             <div class="mb-4">
                 <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Material Name *</label>
+                @error('name')
+                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
+                @enderror
                 <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('name') border-red-500 @enderror">
             </div>
 
             <div class="mb-4">
                 <label for="institute_id" class="block text-gray-700 text-sm font-bold mb-2">Institute *</label>
+                @error('institute_id')
+                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
+                @enderror
                 <select name="institute_id" id="institute_id" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('institute_id') border-red-500 @enderror">
                     <option value="">Select Institute</option>
                     @foreach($institutes as $institute)
                         <option value="{{ $institute->id }}" {{ old('institute_id') == $institute->id ? 'selected' : '' }}>
@@ -31,16 +37,22 @@
 
             <div class="mb-4">
                 <label for="department_id" class="block text-gray-700 text-sm font-bold mb-2">Department *</label>
+                @error('department_id')
+                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
+                @enderror
                 <select name="department_id" id="department_id" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('department_id') border-red-500 @enderror">
                     <option value="">Select Department</option>
                 </select>
             </div>
 
             <div class="mb-4">
                 <label for="semester" class="block text-gray-700 text-sm font-bold mb-2">Semester *</label>
+                @error('semester')
+                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
+                @enderror
                 <select name="semester" id="semester" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('semester') border-red-500 @enderror">
                     <option value="">Select Semester</option>
                     @for($i = 1; $i <= 12; $i++)
                         <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
@@ -50,8 +62,11 @@
 
             <div class="mb-4">
                 <label for="file" class="block text-gray-700 text-sm font-bold mb-2">File * (PDF, DOC, DOCX, PPT, PPTX, TXT - Max 10MB)</label>
+                @error('file')
+                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
+                @enderror
                 <input type="file" name="file" id="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('file') border-red-500 @enderror">
             </div>
 
             <div class="mb-4">
@@ -73,24 +88,51 @@
 </div>
 
 <script>
-    // Load departments based on selected institute
-    document.getElementById('institute_id').addEventListener('change', function() {
-        const instituteId = this.value;
+    // Function to load departments
+    function loadDepartments(instituteId, selectedDepartmentId = null) {
         const departmentSelect = document.getElementById('department_id');
         
         departmentSelect.innerHTML = '<option value="">Select Department</option>';
         
         if (instituteId) {
             fetch(`/api/departments?institute_id=${instituteId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load departments');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     data.forEach(dept => {
                         const option = document.createElement('option');
                         option.value = dept.id;
                         option.textContent = dept.name;
+                        if (selectedDepartmentId && dept.id == selectedDepartmentId) {
+                            option.selected = true;
+                        }
                         departmentSelect.appendChild(option);
                     });
+                })
+                .catch(error => {
+                    console.error('Error loading departments:', error);
+                    departmentSelect.innerHTML = '<option value="">Error loading departments</option>';
                 });
+        }
+    }
+
+    // Load departments based on selected institute
+    document.getElementById('institute_id').addEventListener('change', function() {
+        loadDepartments(this.value);
+    });
+
+    // Load departments on page load if there's an old institute_id (after validation error)
+    document.addEventListener('DOMContentLoaded', function() {
+        const instituteSelect = document.getElementById('institute_id');
+        const oldInstituteId = instituteSelect.value;
+        const oldDepartmentId = @json(old('department_id'));
+        
+        if (oldInstituteId) {
+            loadDepartments(oldInstituteId, oldDepartmentId);
         }
     });
 </script>

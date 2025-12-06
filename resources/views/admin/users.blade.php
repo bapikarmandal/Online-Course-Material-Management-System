@@ -62,14 +62,6 @@
                     <td style="padding: 12px;">{{ $user->created_at->format('M d, Y') }}</td>
                     <td style="padding: 12px;">
                         <div style="display: flex; gap: 5px; align-items: center;">
-                            <button type="button" class="btn-edit-user"
-                                    data-id="{{ $user->id }}" 
-                                    data-name="{{ $user->name }}"
-                                    data-email="{{ $user->email }}"
-                                    data-role="{{ $user->role }}"
-                                    style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
                             @if(!$user->isAdmin())
                                 <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline"
                                       onsubmit="return confirm('Are you sure you want to delete this user?');">
@@ -99,37 +91,8 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle edit button clicks
-        document.querySelectorAll('.btn-edit-user').forEach(button => {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-id');
-                const userName = this.getAttribute('data-name');
-                const userEmail = this.getAttribute('data-email');
-                const userRole = this.getAttribute('data-role');
-                
-                document.getElementById('edit_user_name').value = userName;
-                document.getElementById('edit_user_email').value = userEmail;
-                document.getElementById('edit_user_role').value = userRole;
-                document.getElementById('editUserForm').action = '/admin/users/' + userId;
-                
-                document.getElementById('editUserModal').style.display = 'block';
-            });
-        });
         
-        // Close modal
-        document.querySelectorAll('.close-modal').forEach(button => {
-            button.addEventListener('click', function() {
-                document.getElementById('editUserModal').style.display = 'none';
-            });
-        });
         
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('editUserModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
     });
 </script>
 @endsection

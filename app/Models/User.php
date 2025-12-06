@@ -13,6 +13,10 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    public const ROLE_USER = 'user';
+    public const ROLE_FACULTY = 'faculty';
+    public const ROLE_ADMIN = 'admin';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -24,6 +28,22 @@ class User extends Authenticatable
         'password',
         'role',
     ];
+
+    // Role check methods
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isFaculty(): bool
+    {
+        return $this->role === self::ROLE_FACULTY;
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role === self::ROLE_USER;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -53,18 +73,5 @@ class User extends Authenticatable
         return $this->hasMany(Material::class, 'uploaded_by');
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isFaculty(): bool
-    {
-        return $this->role === 'faculty';
-    }
-
-    public function isStudent(): bool
-    {
-        return $this->role === 'student';
-    }
+    // Role check methods are now defined above
 }

@@ -7,6 +7,7 @@ use App\Models\Institute;
 use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class MaterialController extends Controller
 {
@@ -89,9 +90,12 @@ class MaterialController extends Controller
             }
 
             return redirect()->route('materials.index')->with('success', 'Material uploaded successfully!');
+        } catch (ValidationException $e) {
+            // Let Laravel handle validation exceptions (they redirect back with errors automatically)
+            throw $e;
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+                return response()->json(['success' => false, 'message' => 'Failed to upload material: ' . $e->getMessage()], 422);
             }
             
             return redirect()->back()
