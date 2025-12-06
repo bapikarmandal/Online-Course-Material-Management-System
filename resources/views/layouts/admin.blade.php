@@ -204,54 +204,25 @@
         </form>
     </div>
 
-    <div class="main-content">
-        <div class="top-bar">
-            <h1 style="margin: 0; color: #333;">@yield('page-title', 'Dashboard')</h1>
-            <div>
-                <span style="color: #666;">Welcome, {{ auth()->user()->name }}</span>
-            </div>
-        </div>
-
-        @if(session('success'))
-            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @yield('content')
-    </div>
-
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Initialize DataTables
+            // Initialize DataTables only if not already initialized
             if ($('.data-table').length) {
-                $('.data-table').DataTable({
-                    "pageLength": 25,
-                    "order": [[0, "desc"]],
-                    "language": {
-                        "search": "Search:",
-                        "lengthMenu": "Show _MENU_ entries",
-                        "info": "Showing _START_ to _END_ of _TOTAL_ entries",
-                        "infoEmpty": "No entries found",
-                        "infoFiltered": "(filtered from _MAX_ total entries)"
+                $('.data-table').each(function() {
+                    if (!$.fn.dataTable.isDataTable(this)) {
+                        $(this).DataTable({
+                            "pageLength": 25,
+                            "order": [[0, "desc"]],
+                            "language": {
+                                "search": "Search:",
+                                "lengthMenu": "Show _MENU_ entries",
+                                "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                                "infoEmpty": "No entries found",
+                                "infoFiltered": "(filtered from _MAX_ total entries)"
+                            }
+                        });
                     }
                 });
             }

@@ -3,8 +3,35 @@
 @section('title', 'Manage Institutes')
 @section('page-title', 'Manage Institutes')
 
-@section('content')
 <div class="main-content">
+        <div class="top-bar">
+            <h1 style="margin: 0; color: #333;">@yield('page-title', 'Dashboard')</h1>
+            <div>
+                <span style="color: #666;">Welcome, {{ auth()->user()->name }}</span>
+            </div>
+        </div>
+
+        @if(session('success'))
+            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+                <ul style="margin: 0; padding-left: 20px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
     <div class="card" style="margin-bottom: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="margin: 0; color: #333;">Institutes</h2>

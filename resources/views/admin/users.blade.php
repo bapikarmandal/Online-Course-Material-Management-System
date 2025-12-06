@@ -3,7 +3,36 @@
 @section('title', 'Manage Users')
 @section('page-title', 'Manage Users')
 
-@section('content')
+<div class="main-content">
+        <div class="top-bar">
+            <h1 style="margin: 0; color: #333;">@yield('page-title', 'Dashboard')</h1>
+            <div>
+                <span style="color: #666;">Welcome, {{ auth()->user()->name }}</span>
+            </div>
+        </div>
+
+        @if(session('success'))
+            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+                <ul style="margin: 0; padding-left: 20px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
 <div class="card">
     <h2 style="margin: 0 0 20px 0; color: #333;">All Users</h2>
 
@@ -65,37 +94,6 @@
         {{ $users->links() }}
     </div>
 </div>
-
-<!-- Edit User Modal -->
-<div id="editUserModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <span class="close close-modal">&times;</span>
-        <h2 style="margin-top: 0; color: #333;">Edit User</h2>
-        <form id="editUserForm" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label for="edit_user_name">Name *</label>
-                <input type="text" name="name" id="edit_user_name" required>
-            </div>
-            <div class="form-group">
-                <label for="edit_user_email">Email *</label>
-                <input type="email" name="email" id="edit_user_email" required>
-            </div>
-            <div class="form-group">
-                <label for="edit_user_role">Role *</label>
-                <select name="role" id="edit_user_role" required>
-                    <option value="student">Student</option>
-                    <option value="faculty">Faculty</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" class="btn-danger close-modal">Cancel</button>
-                <button type="submit" class="btn-primary">Update User</button>
-            </div>
-        </form>
-    </div>
 </div>
 
 @section('scripts')
