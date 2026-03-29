@@ -1,98 +1,70 @@
 @extends('layouts.admin')
 
 @section('title', 'Manage Users')
-@section('page-title', 'Manage Users')
 
-<div class="main-content">
-        <div class="top-bar">
-            <h1 style="margin: 0; color: #333;">@yield('page-title', 'Dashboard')</h1>
-            <div>
-                <span style="color: #666;">Welcome, {{ auth()->user()->name }}</span>
-            </div>
-        </div>
-
-        @if(session('success'))
-            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+@section('content')
+<div class="top-bar">
+    <h1 style="margin:0; color:#333;">Manage Users</h1>
+    <span style="color:#666;">Welcome, {{ auth()->user()->name }}</span>
+</div>
 
 <div class="card">
-    <h2 style="margin: 0 0 20px 0; color: #333;">All Users</h2>
+    <h2 style="margin:0 0 20px; color:#333;">All Users</h2>
 
-    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+    <table class="data-table" style="width:100%;">
         <thead>
-            <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                <th style="padding: 12px; text-align: left;">ID</th>
-                <th style="padding: 12px; text-align: left;">Name</th>
-                <th style="padding: 12px; text-align: left;">Email</th>
-                <th style="padding: 12px; text-align: left;">Role</th>
-                <th style="padding: 12px; text-align: left;">Registered</th>
-                <th style="padding: 12px; text-align: left;">Actions</th>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Registered</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach($users as $user)
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 12px;">{{ $user->id }}</td>
-                    <td style="padding: 12px;">{{ $user->name }}</td>
-                    <td style="padding: 12px;">{{ $user->email }}</td>
-                    <td style="padding: 12px;">
-                        <span style="padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: 600;
-                            {{ $user->role == 'admin' ? 'background: #e74c3c; color: white;' : ($user->role == 'faculty' ? 'background: #3498db; color: white;' : 'background: #27ae60; color: white;') }}">
+                <tr>
+                    <td>{{ $user->id }}</td>
+                    <td>{{ $user->name }}</td>
+                    <td>{{ $user->email }}</td>
+                    <td>
+                        @php
+                            $roleColors = [
+                                'admin'   => '#e74c3c',
+                                'faculty' => '#3498db',
+                                'student' => '#27ae60',
+                            ];
+                            $color = $roleColors[$user->role] ?? '#95a5a6';
+                        @endphp
+                        <span style="padding:4px 10px; border-radius:12px; font-size:12px;
+                                     font-weight:600; background:{{ $color }}; color:white;">
                             {{ ucfirst($user->role) }}
                         </span>
                     </td>
-                    <td style="padding: 12px;">{{ $user->created_at->format('M d, Y') }}</td>
-                    <td style="padding: 12px;">
-                        <div style="display: flex; gap: 5px; align-items: center;">
-                            @if(!$user->isAdmin())
-                                <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline"
-                                      onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-danger" style="font-size: 12px;">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </form>
-                            @else
-                                <span style="color: #999; font-size: 12px;">Cannot delete admin</span>
-                            @endif
-                        </div>
+                    <td>{{ $user->created_at->format('M d, Y') }}</td>
+                    <td>
+                        @if(!$user->isAdmin())
+                            <form action="{{ route('admin.users.delete', $user->id) }}"
+                                  method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Delete this user?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        @else
+                            <span style="color:#999; font-size:12px;">Protected</span>
+                        @endif
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-    
-    <!-- Pagination -->
-    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center;">
+
+    <div style="margin-top:20px;">
         {{ $users->links() }}
     </div>
 </div>
-</div>
-
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        
-    });
-</script>
 @endsection

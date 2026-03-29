@@ -1,140 +1,109 @@
-@extends('layouts.app')
+@extends('faculty.layouts.app')
 
 @section('title', 'Upload Material')
 
 @section('content')
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-white rounded-lg shadow-md p-8">
-        <h1 class="text-3xl font-bold mb-6">Upload Study Material</h1>
-        
-        <form action="{{ route('materials.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            
-            <div class="mb-4">
-                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Material Name *</label>
-                @error('name')
-                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
-                @enderror
-                <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('name') border-red-500 @enderror">
-            </div>
+<div class="top-bar">
+    <h1 style="margin:0; color:#333;">Upload New Material</h1>
+    <a href="{{ route('faculty.dashboard') }}" class="btn-primary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
 
-            <div class="mb-4">
-                <label for="institute_id" class="block text-gray-700 text-sm font-bold mb-2">Institute *</label>
-                @error('institute_id')
-                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
-                @enderror
-                <select name="institute_id" id="institute_id" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('institute_id') border-red-500 @enderror">
+<div class="card" style="max-width:700px;">
+    <form action="{{ route('faculty.materials.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+
+        <div class="form-group">
+            <label>Material Name *</label>
+            <input type="text" name="name" value="{{ old('name') }}" required
+                   placeholder="e.g. Data Structures Notes — Unit 3">
+            @error('name')<p style="color:#e74c3c; font-size:13px; margin-top:4px;">{{ $message }}</p>@enderror
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div class="form-group">
+                <label>Institute *</label>
+                <select name="institute_id" id="institute_id" required>
                     <option value="">Select Institute</option>
-                    @foreach($institutes as $institute)
-                        <option value="{{ $institute->id }}" {{ old('institute_id') == $institute->id ? 'selected' : '' }}>
-                            {{ $institute->name }}
+                    @foreach($institutes as $inst)
+                        <option value="{{ $inst->id }}"
+                            {{ old('institute_id') == $inst->id ? 'selected' : '' }}>
+                            {{ $inst->name }}
                         </option>
                     @endforeach
                 </select>
+                @error('institute_id')<p style="color:#e74c3c; font-size:13px; margin-top:4px;">{{ $message }}</p>@enderror
             </div>
 
-            <div class="mb-4">
-                <label for="department_id" class="block text-gray-700 text-sm font-bold mb-2">Department *</label>
-                @error('department_id')
-                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
-                @enderror
-                <select name="department_id" id="department_id" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('department_id') border-red-500 @enderror">
+            <div class="form-group">
+                <label>Department *</label>
+                <select name="department_id" id="department_id" required>
                     <option value="">Select Department</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}"
+                            {{ old('department_id') == $dept->id ? 'selected' : '' }}>
+                            {{ $dept->name }}
+                        </option>
+                    @endforeach
                 </select>
+                @error('department_id')<p style="color:#e74c3c; font-size:13px; margin-top:4px;">{{ $message }}</p>@enderror
             </div>
+        </div>
 
-            <div class="mb-4">
-                <label for="semester" class="block text-gray-700 text-sm font-bold mb-2">Semester *</label>
-                @error('semester')
-                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
-                @enderror
-                <select name="semester" id="semester" required
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('semester') border-red-500 @enderror">
-                    <option value="">Select Semester</option>
-                    @for($i = 1; $i <= 12; $i++)
-                        <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
-                    @endfor
-                </select>
-            </div>
+        <div class="form-group" style="max-width:200px;">
+            <label>Semester *</label>
+            <select name="semester" required>
+                <option value="">Select</option>
+                @for($i=1; $i<=12; $i++)
+                    <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>
+                        Semester {{ $i }}
+                    </option>
+                @endfor
+            </select>
+            @error('semester')<p style="color:#e74c3c; font-size:13px; margin-top:4px;">{{ $message }}</p>@enderror
+        </div>
 
-            <div class="mb-4">
-                <label for="file" class="block text-gray-700 text-sm font-bold mb-2">File * (PDF, DOC, DOCX, PPT, PPTX, TXT - Max 10MB)</label>
-                @error('file')
-                    <p class="text-red-500 text-xs italic mb-1">{{ $message }}</p>
-                @enderror
-                <input type="file" name="file" id="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('file') border-red-500 @enderror">
-            </div>
+        <div class="form-group">
+            <label>File * <small style="color:#666;">(PDF, DOC, DOCX, PPT, PPTX, TXT — Max 10 MB)</small></label>
+            <input type="file" name="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
+            @error('file')<p style="color:#e74c3c; font-size:13px; margin-top:4px;">{{ $message }}</p>@enderror
+        </div>
 
-            <div class="mb-4">
-                <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description</label>
-                <textarea name="description" id="description" rows="4"
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ old('description') }}</textarea>
-            </div>
+        <div class="form-group">
+            <label>Description <small style="color:#666;">(optional)</small></label>
+            <textarea name="description" rows="3"
+                      placeholder="Brief description of the material…">{{ old('description') }}</textarea>
+        </div>
 
-            <div class="flex items-center justify-between">
-                <a href="{{ route('materials.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                    Cancel
-                </a>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Upload Material
-                </button>
-            </div>
-        </form>
-    </div>
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:10px;">
+            <a href="{{ route('faculty.dashboard') }}" class="btn-danger" style="text-decoration:none;">
+                Cancel
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-upload"></i> Upload Material
+            </button>
+        </div>
+    </form>
 </div>
-
-<script>
-    // Function to load departments
-    function loadDepartments(instituteId, selectedDepartmentId = null) {
-        const departmentSelect = document.getElementById('department_id');
-        
-        departmentSelect.innerHTML = '<option value="">Select Department</option>';
-        
-        if (instituteId) {
-            fetch(`/api/departments?institute_id=${instituteId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to load departments');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    data.forEach(dept => {
-                        const option = document.createElement('option');
-                        option.value = dept.id;
-                        option.textContent = dept.name;
-                        if (selectedDepartmentId && dept.id == selectedDepartmentId) {
-                            option.selected = true;
-                        }
-                        departmentSelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading departments:', error);
-                    departmentSelect.innerHTML = '<option value="">Error loading departments</option>';
-                });
-        }
-    }
-
-    // Load departments based on selected institute
-    document.getElementById('institute_id').addEventListener('change', function() {
-        loadDepartments(this.value);
-    });
-
-    // Load departments on page load if there's an old institute_id (after validation error)
-    document.addEventListener('DOMContentLoaded', function() {
-        const instituteSelect = document.getElementById('institute_id');
-        const oldInstituteId = instituteSelect.value;
-        const oldDepartmentId = @json(old('department_id'));
-        
-        if (oldInstituteId) {
-            loadDepartments(oldInstituteId, oldDepartmentId);
-        }
-    });
-</script>
 @endsection
 
+@push('scripts')
+<script>
+$(document).ready(function () {
+    $('#institute_id').on('change', function () {
+        var instId = this.value;
+        var $dept  = $('#department_id');
+        $dept.html('<option value="">Loading…</option>');
+        if (!instId) { $dept.html('<option value="">Select Department</option>'); return; }
+        $.getJSON('/api/departments', { institute_id: instId }, function (data) {
+            var opts = '<option value="">Select Department</option>';
+            $.each(data, function (i, d) {
+                opts += '<option value="' + d.id + '">' + d.name + '</option>';
+            });
+            $dept.html(opts);
+        });
+    });
+});
+</script>
+@endpush

@@ -6,14 +6,14 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
-        health: '/up',
+        web:      __DIR__ . '/../routes/web.php',
+        commands: __DIR__ . '/../routes/console.php',
+        health:   '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // THIS IS THE MISSING PART THAT FIXES YOUR ERROR
         $middleware->alias([
             'user-role' => \App\Http\Middleware\UserRoleMiddleware::class,
+            'faculty'   => \App\Http\Middleware\Faculty::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -14,6 +14,7 @@ class Department extends Model
     protected $fillable = [
         'name',
         'institute_id',
+        'description',   // ← added so updateDepartment works
     ];
 
     public function institute(): BelongsTo

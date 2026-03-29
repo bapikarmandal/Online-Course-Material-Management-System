@@ -27,7 +27,7 @@ class MaterialController extends Controller
             $query->where('semester', $request->semester);
         }
 
-        $materials = $query->latest()->paginate(12);
+        $materials  = $query->latest()->paginate(12);
         $institutes = Institute::with('departments')->get();
 
         return view('materials.index', compact('materials', 'institutes'));
@@ -42,11 +42,11 @@ class MaterialController extends Controller
 
     public function download(Material $material)
     {
-        $material->incrementDownloads();
-        
         if (!Storage::disk('public')->exists($material->file_path)) {
-            abort(404, 'File not found');
+            abort(404, 'File not found.');
         }
+
+        $material->incrementDownloads();
 
         return Storage::disk('public')->download($material->file_path, $material->file_name);
     }
@@ -61,28 +61,28 @@ class MaterialController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'institute_id' => ['required', 'exists:institutes,id'],
+                'name'          => ['required', 'string', 'max:255'],
+                'institute_id'  => ['required', 'exists:institutes,id'],
                 'department_id' => ['required', 'exists:departments,id'],
-                'semester' => ['required', 'integer', 'min:1', 'max:12'],
-                'file' => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx,ppt,pptx,txt'],
-                'description' => ['nullable', 'string'],
+                'semester'      => ['required', 'integer', 'min:1', 'max:12'],
+                'file'          => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx,ppt,pptx,txt'],
+                'description'   => ['nullable', 'string'],
             ]);
 
-            $file = $request->file('file');
+            $file     = $request->file('file');
             $filePath = $file->store('materials', 'public');
 
             Material::create([
-                'name' => $validated['name'],
-                'institute_id' => $validated['institute_id'],
+                'name'          => $validated['name'],
+                'institute_id'  => $validated['institute_id'],
                 'department_id' => $validated['department_id'],
-                'semester' => $validated['semester'],
-                'file_path' => $filePath,
-                'file_name' => $file->getClientOriginalName(),
-                'file_type' => $file->getClientMimeType(),
-                'file_size' => $file->getSize(),
-                'uploaded_by' => auth()->id(),
-                'description' => $validated['description'] ?? null,
+                'semester'      => $validated['semester'],
+                'file_path'     => $filePath,
+                'file_name'     => $file->getClientOriginalName(),
+                'file_type'     => $file->getClientMimeType(),
+                'file_size'     => $file->getSize(),
+                'uploaded_by'   => auth()->id(),
+                'description'   => $validated['description'] ?? null,
             ]);
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -90,22 +90,31 @@ class MaterialController extends Controller
             }
 
             return redirect()->route('materials.index')->with('success', 'Material uploaded successfully!');
+
         } catch (ValidationException $e) {
-            // Let Laravel handle validation exceptions (they redirect back with errors automatically)
             throw $e;
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Failed to upload material: ' . $e->getMessage()], 422);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to upload material: ' . $e->getMessage(),
+                ], 422);
             }
-            
+
             return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Failed to upload material: ' . $e->getMessage()]);
+                             ->withInput()
+                             ->withErrors(['error' => 'Failed to upload material: ' . $e->getMessage()]);
         }
     }
 
     public function destroy(Material $material)
     {
+        // Only admin or the uploader may delete
+        $user = auth()->user();
+        if (!$user->isAdmin() && $material->uploaded_by !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         if (Storage::disk('public')->exists($material->file_path)) {
             Storage::disk('public')->delete($material->file_path);
         }

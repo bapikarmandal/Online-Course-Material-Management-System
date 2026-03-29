@@ -1,121 +1,96 @@
 @extends('layouts.admin')
 
 @section('title', 'Manage Institutes')
-@section('page-title', 'Manage Institutes')
 
-<div class="main-content">
-        <div class="top-bar">
-            <h1 style="margin: 0; color: #333;">@yield('page-title', 'Dashboard')</h1>
-            <div>
-                <span style="color: #666;">Welcome, {{ auth()->user()->name }}</span>
-            </div>
-        </div>
+@section('content')
+<div class="top-bar">
+    <h1 style="margin:0; color:#333;">Manage Institutes</h1>
+    <span style="color:#666;">Welcome, {{ auth()->user()->name }}</span>
+</div>
 
-        @if(session('success'))
-            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-    <div class="card" style="margin-bottom: 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2 style="margin: 0; color: #333;">Institutes</h2>
-    <button class="btn-primary modal-trigger" data-modal="addInstituteModal">
-        <i class="fas fa-plus"></i> Add Institute
-    </button>
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; color:#333;">Institutes</h2>
+        <button class="btn-primary modal-trigger" data-modal="addInstituteModal">
+            <i class="fas fa-plus"></i> Add Institute
+        </button>
     </div>
 
-    <table class="data-table" style="width: 100%; border-collapse: collapse;">
-    <thead>
-        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-            <th style="padding: 12px; text-align: left;">ID</th>
-            <th style="padding: 12px; text-align: left;">Institute Name</th>
-            <th style="padding: 12px; text-align: left;">Description</th>
-            <th style="padding: 12px; text-align: left;">Departments</th>
-            <th style="padding: 12px; text-align: left;">Materials</th>
-            <th style="padding: 12px; text-align: left;">Created</th>
-            <th style="padding: 12px; text-align: left;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($institutes as $institute)
-            <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px;">{{ $institute->id }}</td>
-                <td style="padding: 12px; font-weight: 600;">{{ $institute->name }}</td>
-                <td style="padding: 12px;">{{ $institute->description ?? 'N/A' }}</td>
-                <td style="padding: 12px;">
-                    <span style="background: #667eea; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
-                        {{ $institute->departments_count }}
-                    </span>
-                </td>
-                <td style="padding: 12px;">
-                    <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
-                        {{ $institute->materials_count }}
-                    </span>
-                </td>
-                <td style="padding: 12px;">{{ $institute->created_at->format('M d, Y') }}</td>
-                <td style="padding: 12px;">
-                    <div style="display: flex; gap: 5px; align-items: center;">
+    <table class="data-table" style="width:100%;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Departments</th>
+                <th>Materials</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($institutes as $institute)
+                <tr>
+                    <td>{{ $institute->id }}</td>
+                    <td><strong>{{ $institute->name }}</strong></td>
+                    <td>{{ Str::limit($institute->description ?? 'N/A', 60) }}</td>
+                    <td>
+                        <span style="background:#667eea; color:white; padding:4px 10px;
+                                     border-radius:12px; font-size:12px;">
+                            {{ $institute->departments_count }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="background:#27ae60; color:white; padding:4px 10px;
+                                     border-radius:12px; font-size:12px;">
+                            {{ $institute->materials_count }}
+                        </span>
+                    </td>
+                    <td>{{ $institute->created_at->format('M d, Y') }}</td>
+                    <td>
                         <button type="button" class="btn-edit-institute"
-                                data-id="{{ $institute->id }}" 
+                                style="background:#3498db; color:white; border:none;
+                                       padding:6px 12px; border-radius:4px; cursor:pointer;
+                                       font-size:12px; margin-right:4px;"
+                                data-id="{{ $institute->id }}"
                                 data-name="{{ $institute->name }}"
-                                data-description="{{ $institute->description ?? '' }}"
-                                style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px;">
+                                data-description="{{ $institute->description ?? '' }}">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <form action="{{ route('admin.institutes.delete', $institute) }}" method="POST" class="inline"
-                                onsubmit="return confirm('Are you sure you want to delete this institute? This will fail if it has departments or materials.');">
+                        <form action="{{ route('admin.institutes.delete', $institute->id) }}"
+                              method="POST" style="display:inline;"
+                              onsubmit="return confirm('Delete this institute?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn-danger" style="font-size: 12px;">
+                            <button type="submit" class="btn-danger">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </form>
-                    </div>
-                </td>
-            </tr>
-        @endforeach
-    </tbody>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
     </table>
 
-    <!-- Pagination -->
-    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center;">
-    {{ $institutes->links() }}
-    </div>
-    </div>
+    <div style="margin-top:20px;">{{ $institutes->links() }}</div>
 </div>
 
-<!-- Add Institute Modal -->
+{{-- ── Add Modal ── --}}
 <div id="addInstituteModal" class="modal">
     <div class="modal-content">
         <span class="close close-modal">&times;</span>
-        <h2 style="margin-top: 0; color: #333;">Add New Institute</h2>
+        <h2 style="margin-top:0; color:#333;">Add New Institute</h2>
         <form action="{{ route('admin.institutes.store') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label for="name">Institute Name *</label>
-                <input type="text" name="name" id="name" required>
+                <label>Institute Name *</label>
+                <input type="text" name="name" required>
             </div>
             <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" id="description" rows="3"></textarea>
+                <label>Description</label>
+                <textarea name="description" rows="3"></textarea>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
                 <button type="button" class="btn-danger close-modal">Cancel</button>
                 <button type="submit" class="btn-primary">Add Institute</button>
             </div>
@@ -123,63 +98,42 @@
     </div>
 </div>
 
-<!-- Edit Institute Modal -->
+{{-- ── Edit Modal ── --}}
 <div id="editInstituteModal" class="modal">
     <div class="modal-content">
         <span class="close close-modal">&times;</span>
-        <h2 style="margin-top: 0; color: #333;">Edit Institute</h2>
+        <h2 style="margin-top:0; color:#333;">Edit Institute</h2>
         <form id="editInstituteForm" method="POST">
             @csrf
             @method('PUT')
             <div class="form-group">
-                <label for="edit_institute_name">Institute Name *</label>
-                <input type="text" name="name" id="edit_institute_name" required>
+                <label>Institute Name *</label>
+                <input type="text" name="name" id="edit_inst_name" required>
             </div>
             <div class="form-group">
-                <label for="edit_institute_description">Description</label>
-                <textarea name="description" id="edit_institute_description" rows="3"></textarea>
+                <label>Description</label>
+                <textarea name="description" id="edit_inst_desc" rows="3"></textarea>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
                 <button type="button" class="btn-danger close-modal">Cancel</button>
-                <button type="submit" class="btn-primary">Update Institute</button>
+                <button type="submit" class="btn-primary">Update</button>
             </div>
         </form>
     </div>
 </div>
-
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle edit button clicks
-        document.querySelectorAll('.btn-edit-institute').forEach(button => {
-            button.addEventListener('click', function() {
-                const instituteId = this.getAttribute('data-id');
-                const instituteName = this.getAttribute('data-name');
-                const instituteDescription = this.getAttribute('data-description');
-                
-                document.getElementById('edit_institute_name').value = instituteName;
-                document.getElementById('edit_institute_description').value = instituteDescription || '';
-                document.getElementById('editInstituteForm').action = '/admin/institutes/' + instituteId;
-                
-                document.getElementById('editInstituteModal').style.display = 'block';
-            });
-        });
-        
-        // Close modal
-        document.querySelectorAll('.close-modal').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.style.display = 'none';
-                });
-            });
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        });
-    });
-</script>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function () {
+    $(document).on('click', '.btn-edit-institute', function () {
+        var btn = $(this);
+        $('#edit_inst_name').val(btn.data('name'));
+        $('#edit_inst_desc').val(btn.data('description'));
+        $('#editInstituteForm').attr('action', '/admin/institutes/' + btn.data('id'));
+        $('#editInstituteModal').fadeIn(200);
+        $('body').css('overflow', 'hidden');
+    });
+});
+</script>
+@endpush
