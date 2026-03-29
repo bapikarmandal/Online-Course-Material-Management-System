@@ -13,8 +13,9 @@ class FacultyController extends Controller
 {
     /**
      * Display the faculty dashboard.
+     * Renamed from 'dashboard' to 'index' to match your Route definition.
      */
-    public function dashboard()
+    public function index()
     {
         $materials = Auth::user()->materials()
             ->with(['institute', 'department'])
@@ -65,6 +66,7 @@ class FacultyController extends Controller
             'uploaded_by' => Auth::id(),
         ]);
 
+        // Note: Ensure your route for the dashboard is named 'faculty.dashboard'
         return redirect()->route('faculty.dashboard')
             ->with('success', 'Material uploaded successfully!');
     }
@@ -80,6 +82,7 @@ class FacultyController extends Controller
         }
 
         $institutes = Institute::all();
+        // Ideally fetch departments based on the institute
         $departments = Department::where('institute_id', $material->institute_id)->get();
         
         return view('faculty.materials.edit', compact('material', 'institutes', 'departments'));
@@ -137,7 +140,9 @@ class FacultyController extends Controller
         }
 
         // Delete the file from storage
-        Storage::disk('public')->delete($material->file_path);
+        if (Storage::disk('public')->exists($material->file_path)) {
+            Storage::disk('public')->delete($material->file_path);
+        }
         
         // Delete the record
         $material->delete();

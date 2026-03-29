@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['user', 'faculty', 'admin'])->default('user')->change();
+            // FIX: Ensure 'student' is in the enum list instead of the conflicting 'user'.
+            $table->enum('role', ['student', 'faculty', 'admin'])->default('student')->change();
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['user', 'admin'])->default('user')->change();
+            // FIX: Rollback uses 'student' for consistency.
+            $table->enum('role', ['student', 'admin'])->default('student')->change();
         });
     }
 };

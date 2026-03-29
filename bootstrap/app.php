@@ -10,11 +10,12 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+    ->withMiddleware(function (Middleware $middleware) {
+        // THIS IS THE MISSING PART THAT FIXES YOUR ERROR
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'user-role' => \App\Http\Middleware\UserRoleMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

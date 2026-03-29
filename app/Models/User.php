@@ -13,7 +13,8 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    public const ROLE_USER = 'user';
+    // FIX: Changed ROLE_USER from 'user' to 'student' to match seeding/migration logic
+    public const ROLE_USER = 'student'; 
     public const ROLE_FACULTY = 'faculty';
     public const ROLE_ADMIN = 'admin';
 

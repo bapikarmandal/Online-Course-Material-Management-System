@@ -193,9 +193,12 @@
         <a href="{{ route('admin.departments') }}" class="{{ request()->routeIs('admin.departments') ? 'active' : '' }}">
             <i class="fas fa-building"></i> Departments
         </a>
-        <a href="{{ route('home') }}" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+        
+        {{-- FIX: Updated 'Back to Site' link to use the root URL '/' --}}
+        <a href="/" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
             <i class="fas fa-home"></i> Back to Site
         </a>
+        
         <form method="POST" action="{{ route('logout') }}" style="padding: 15px 20px;">
             @csrf
             <button type="submit" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 15px; border-radius: 5px; width: 100%; cursor: pointer;">
@@ -250,4 +253,3 @@
     @yield('scripts')
 </body>
 </html>
-

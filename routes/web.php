@@ -1,70 +1,75 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FacultyController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\AuthController; // If you have a custom AuthController
 
-// Public routes
-Route::get('/', [HomeController::class, 'index'])->name('home');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-// Authentication routes
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+// 1. Landing Page (The College Website View)
+Route::get('/', function () {
+    return view('college_landing');
+})->name('landing');
+
+// 2. Authentication Routes (Laravel Default)
+Auth::routes();
+
+// 3. Student / General Dashboard (The 'home' route)
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+// 4. Admin Routes
+Route::middleware(['auth', 'user-role:admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    
+    // Admin Material Management
+    Route::get('/admin/materials', [AdminController::class, 'materials'])->name('admin.materials');
+    Route::delete('/admin/materials/{id}', [AdminController::class, 'deleteMaterial'])->name('admin.materials.delete');
+    
+    // Admin Institutes & Departments
+    Route::get('/admin/institutes', [AdminController::class, 'institutes'])->name('admin.institutes');
+    Route::post('/admin/institutes', [AdminController::class, 'storeInstitute'])->name('admin.institutes.store');
+    Route::put('/admin/institutes/{id}', [AdminController::class, 'updateInstitute']);
+    Route::delete('/admin/institutes/{id}', [AdminController::class, 'deleteInstitute'])->name('admin.institutes.delete');
+
+    Route::get('/admin/departments', [AdminController::class, 'departments'])->name('admin.departments');
+    Route::post('/admin/departments', [AdminController::class, 'storeDepartment'])->name('admin.departments.store');
+    Route::put('/admin/departments/{id}', [AdminController::class, 'updateDepartment']);
+    Route::delete('/admin/departments/{id}', [AdminController::class, 'deleteDepartment'])->name('admin.departments.destroy');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    
-    // Material routes
-    Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
-    
-    // Upload routes (Faculty and Admin only) - Must come before /materials/{material} route
-    Route::middleware('role:faculty,admin')->group(function () {
-        Route::get('/materials/create', [MaterialController::class, 'create'])->name('materials.create');
-        Route::post('/materials', [MaterialController::class, 'store'])->name('materials.store');
-        Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
-    });
-    
-    // Material detail routes (must come after /materials/create)
-    Route::get('/materials/{material}', [MaterialController::class, 'show'])->name('materials.show');
-    Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
-    
-    // Faculty routes
-    Route::middleware('role:faculty')->prefix('faculty')->name('faculty.')->group(function () {
-        Route::get('/dashboard', [FacultyController::class, 'dashboard'])->name('dashboard');
-        Route::get('/materials/create', [FacultyController::class, 'create'])->name('materials.create');
-        Route::post('/materials', [FacultyController::class, 'store'])->name('materials.store');
-        Route::get('/materials/{material}/edit', [FacultyController::class, 'edit'])->name('materials.edit');
-        Route::put('/materials/{material}', [FacultyController::class, 'update'])->name('materials.update');
-        Route::delete('/materials/{material}', [FacultyController::class, 'destroy'])->name('materials.destroy');
-    });
-
-    // Admin routes
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::get('/materials', [AdminController::class, 'materials'])->name('materials');
-        Route::put('/materials/{material}', [AdminController::class, 'updateMaterial'])->name('materials.update');
-        Route::delete('/materials/{material}', [AdminController::class, 'deleteMaterial'])->name('materials.delete');
-        Route::get('/users', [AdminController::class, 'users'])->name('users');
-        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
-        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
-        Route::get('/institutes', [AdminController::class, 'institutes'])->name('institutes');
-        Route::post('/institutes', [AdminController::class, 'storeInstitute'])->name('institutes.store');
-        Route::put('/institutes/{institute}', [AdminController::class, 'updateInstitute'])->name('institutes.update');
-        Route::delete('/institutes/{institute}', [AdminController::class, 'deleteInstitute'])->name('institutes.delete');
-        Route::get('/departments', [AdminController::class, 'departments'])->name('departments');
-        Route::post('/departments', [AdminController::class, 'storeDepartment'])->name('departments.store');
-        Route::put('/departments/{department}', [AdminController::class, 'updateDepartment'])->name('departments.update');
-        Route::delete('/departments/{department}', [AdminController::class, 'deleteDepartment'])->name('departments.destroy');
-    });
+// 5. Faculty Routes
+Route::middleware(['auth', 'user-role:faculty'])->group(function () {
+    Route::get('/faculty/dashboard', [FacultyController::class, 'index'])->name('faculty.dashboard');
+    Route::get('/faculty/materials/create', [FacultyController::class, 'create'])->name('faculty.materials.create');
+    Route::post('/faculty/materials', [FacultyController::class, 'store'])->name('faculty.materials.store');
+    Route::delete('/faculty/materials/{id}', [FacultyController::class, 'destroy'])->name('faculty.materials.destroy');
 });
 
-// API routes for dynamic dropdowns
-Route::get('/api/departments', [MaterialController::class, 'getDepartments'])->name('api.departments');
+// 6. Public Material Routes (For E-Learning)
+Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
+Route::get('/materials/create', [MaterialController::class, 'create'])->name('materials.create')->middleware('auth'); // Only logged in can upload
+Route::post('/materials', [MaterialController::class, 'store'])->name('materials.store')->middleware('auth');
+Route::get('/materials/{id}', [MaterialController::class, 'show'])->name('materials.show');
+Route::get('/materials/download/{id}', [MaterialController::class, 'download'])->name('materials.download');
+Route::delete('/materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy')->middleware('auth');
+
+// 7. API Routes for Dropdowns (AJAX)
+Route::get('/api/departments', function(Illuminate\Http\Request $request) {
+    $institute_id = $request->institute_id;
+    if ($institute_id) {
+        return \App\Models\Department::where('institute_id', $institute_id)->get();
+    }
+    return [];
+});
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

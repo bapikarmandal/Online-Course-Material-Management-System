@@ -2,14 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Institute;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
     public function index()
     {
-        $institutes = Institute::with('departments')->get();
-        return view('home', compact('institutes'));
+        return view('home');
     }
 }

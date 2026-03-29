@@ -14,16 +14,8 @@ class InstituteSeeder extends Seeder
     {
         $institutes = [
             [
-                'name' => 'University of Technology',
-                'description' => 'Leading technology university offering various engineering and computer science programs.',
-            ],
-            [
-                'name' => 'State University',
-                'description' => 'Comprehensive university with programs in arts, sciences, and business.',
-            ],
-            [
-                'name' => 'Medical College',
-                'description' => 'Premier medical institution offering MBBS and other health science programs.',
+                'name' => 'Iswar Chandra Vidyasagar Polytechnic',
+                'description' => 'Established in 1957, Iswar Chandra Vidyasagar Polytechnic (I.C.V. Polytechnic) is a premier government engineering institute located in Sevayatan, Jhargram, West Bengal. Affiliated with the West Bengal State Council of Technical & Vocational Education and Skill Development (WBSCTVESD) and approved by AICTE, the institute has a rich legacy of technical excellence.',
             ],
         ];
 

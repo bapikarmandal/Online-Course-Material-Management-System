@@ -38,7 +38,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
                 <select name="semester" class="w-full border-gray-300 rounded-md shadow-sm">
                     <option value="">All Semesters</option>
-                    @for($i = 1; $i <= 12; $i++)
+                    @for($i = 1; $i <= 6; $i++)
                         <option value="{{ $i }}" {{ request('semester') == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
                     @endfor
                 </select>
