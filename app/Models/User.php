@@ -1,8 +1,6 @@
 <?php
-
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,69 +8,37 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    // FIX: Changed ROLE_USER from 'user' to 'student' to match seeding/migration logic
-    public const ROLE_USER = 'student'; 
+    public const ROLE_STUDENT = 'student';
     public const ROLE_FACULTY = 'faculty';
-    public const ROLE_ADMIN = 'admin';
+    public const ROLE_ADMIN   = 'admin';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-    ];
+    protected $fillable = ['name', 'email', 'password', 'role', 'phone', 'department', 'last_login_at', 'is_active'];
 
-    // Role check methods
-    public function isAdmin(): bool
-    {
-        return $this->role === self::ROLE_ADMIN;
-    }
+    protected $hidden = ['password', 'remember_token'];
 
-    public function isFaculty(): bool
-    {
-        return $this->role === self::ROLE_FACULTY;
-    }
-
-    public function isStudent(): bool
-    {
-        return $this->role === self::ROLE_USER;
-    }
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'last_login_at'     => 'datetime',
+            'password'          => 'hashed',
+            'is_active'         => 'boolean',
         ];
     }
+
+    public function isAdmin(): bool   { return $this->role === self::ROLE_ADMIN; }
+    public function isFaculty(): bool { return $this->role === self::ROLE_FACULTY; }
+    public function isStudent(): bool { return $this->role === self::ROLE_STUDENT; }
 
     public function materials(): HasMany
     {
         return $this->hasMany(Material::class, 'uploaded_by');
     }
 
-    // Role check methods are now defined above
+    public function downloadLogs(): HasMany
+    {
+        return $this->hasMany(DownloadLog::class);
+    }
 }

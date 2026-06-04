@@ -1,122 +1,75 @@
 @extends('layouts.admin')
-
 @section('title', 'Manage Institutes')
-
 @section('content')
-<div class="top-bar">
-    <h1 style="margin:0; color:#333;">Manage Institutes</h1>
-    <span style="color:#666;">Welcome, {{ auth()->user()->name }}</span>
-</div>
 
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0; color:#333;">Institutes</h2>
-        <button class="btn-primary modal-trigger" data-modal="addInstituteModal">
-            <i class="fas fa-plus"></i> Add Institute
-        </button>
+    <div class="card-header">
+        <div class="card-title">Institutes</div>
+        <button class="btn btn-gold" data-modal="addInstModal"><i class="fas fa-plus"></i> Add Institute</button>
     </div>
-
-    <table class="data-table" style="width:100%;">
+    <table class="data-table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Departments</th>
-                <th>Materials</th>
-                <th>Created</th>
-                <th>Actions</th>
-            </tr>
+            <tr><th>#</th><th>Name</th><th>Description</th><th>Depts</th><th>Materials</th><th>Date</th><th>Actions</th></tr>
         </thead>
         <tbody>
-            @foreach($institutes as $institute)
-                <tr>
-                    <td>{{ $institute->id }}</td>
-                    <td><strong>{{ $institute->name }}</strong></td>
-                    <td>{{ Str::limit($institute->description ?? 'N/A', 60) }}</td>
-                    <td>
-                        <span style="background:#667eea; color:white; padding:4px 10px;
-                                     border-radius:12px; font-size:12px;">
-                            {{ $institute->departments_count }}
-                        </span>
-                    </td>
-                    <td>
-                        <span style="background:#27ae60; color:white; padding:4px 10px;
-                                     border-radius:12px; font-size:12px;">
-                            {{ $institute->materials_count }}
-                        </span>
-                    </td>
-                    <td>{{ $institute->created_at->format('M d, Y') }}</td>
-                    <td>
-                        <button type="button" class="btn-edit-institute"
-                                style="background:#3498db; color:white; border:none;
-                                       padding:6px 12px; border-radius:4px; cursor:pointer;
-                                       font-size:12px; margin-right:4px;"
-                                data-id="{{ $institute->id }}"
-                                data-name="{{ $institute->name }}"
-                                data-description="{{ $institute->description ?? '' }}">
+            @foreach($institutes as $inst)
+            <tr>
+                <td style="color:#9a9890; font-family:'DM Mono',monospace; font-size:12px;">{{ $inst->id }}</td>
+                <td style="font-weight:600;">{{ $inst->name }}</td>
+                <td style="font-size:12px; color:#6b6960;">{{ Str::limit($inst->description ?? '—', 60) }}</td>
+                <td><span class="badge badge-faculty">{{ $inst->departments_count }}</span></td>
+                <td><span class="badge badge-student">{{ $inst->materials_count }}</span></td>
+                <td style="font-size:12px; color:#9a9890;">{{ $inst->created_at->format('d M Y') }}</td>
+                <td>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-edit btn-sm btn-open-edit-inst"
+                            data-id="{{ $inst->id }}" data-name="{{ $inst->name }}" data-description="{{ $inst->description ?? '' }}">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <form action="{{ route('admin.institutes.delete', $institute->id) }}"
-                              method="POST" style="display:inline;"
-                              onsubmit="return confirm('Delete this institute?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-danger">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
+                        <form action="{{ route('admin.institutes.delete', $inst->id) }}" method="POST" onsubmit="return confirm('Delete institute?');">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                         </form>
-                    </td>
-                </tr>
+                    </div>
+                </td>
+            </tr>
             @endforeach
         </tbody>
     </table>
-
     <div style="margin-top:20px;">{{ $institutes->links() }}</div>
 </div>
 
-{{-- ── Add Modal ── --}}
-<div id="addInstituteModal" class="modal">
-    <div class="modal-content">
-        <span class="close close-modal">&times;</span>
-        <h2 style="margin-top:0; color:#333;">Add New Institute</h2>
+{{-- Add --}}
+<div id="addInstModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-head"><span class="title">Add Institute</span><button class="modal-close">&times;</button></div>
         <form action="{{ route('admin.institutes.store') }}" method="POST">
             @csrf
-            <div class="form-group">
-                <label>Institute Name *</label>
-                <input type="text" name="name" required>
+            <div class="modal-body">
+                <div class="form-group"><label>Name *</label><input type="text" name="name" class="form-control" required></div>
+                <div class="form-group"><label>Description</label><textarea name="description" class="form-control" rows="3"></textarea></div>
             </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" rows="3"></textarea>
-            </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button type="button" class="btn-danger close-modal">Cancel</button>
-                <button type="submit" class="btn-primary">Add Institute</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-gold">Add Institute</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- ── Edit Modal ── --}}
-<div id="editInstituteModal" class="modal">
-    <div class="modal-content">
-        <span class="close close-modal">&times;</span>
-        <h2 style="margin-top:0; color:#333;">Edit Institute</h2>
-        <form id="editInstituteForm" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label>Institute Name *</label>
-                <input type="text" name="name" id="edit_inst_name" required>
+{{-- Edit --}}
+<div id="editInstModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-head"><span class="title">Edit Institute</span><button class="modal-close">&times;</button></div>
+        <form id="editInstForm" method="POST">
+            @csrf @method('PUT')
+            <div class="modal-body">
+                <div class="form-group"><label>Name *</label><input type="text" name="name" id="edit_inst_name" class="form-control" required></div>
+                <div class="form-group"><label>Description</label><textarea name="description" id="edit_inst_desc" class="form-control" rows="3"></textarea></div>
             </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" id="edit_inst_desc" rows="3"></textarea>
-            </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button type="button" class="btn-danger close-modal">Cancel</button>
-                <button type="submit" class="btn-primary">Update</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-gold">Update</button>
             </div>
         </form>
     </div>
@@ -125,15 +78,12 @@
 
 @push('scripts')
 <script>
-$(document).ready(function () {
-    $(document).on('click', '.btn-edit-institute', function () {
-        var btn = $(this);
-        $('#edit_inst_name').val(btn.data('name'));
-        $('#edit_inst_desc').val(btn.data('description'));
-        $('#editInstituteForm').attr('action', '/admin/institutes/' + btn.data('id'));
-        $('#editInstituteModal').fadeIn(200);
-        $('body').css('overflow', 'hidden');
-    });
+$(document).on('click', '.btn-open-edit-inst', function() {
+    var b = $(this);
+    $('#edit_inst_name').val(b.data('name'));
+    $('#edit_inst_desc').val(b.data('description'));
+    $('#editInstForm').attr('action', '/admin/institutes/' + b.data('id'));
+    $('#editInstModal').addClass('show');
 });
 </script>
 @endpush

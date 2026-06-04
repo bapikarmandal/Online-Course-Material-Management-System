@@ -1,96 +1,73 @@
 @extends('layouts.app')
+@section('title', 'Dashboard — ICV Polytechnic')
 
-@section('title', 'Student Dashboard - ICV Polytechnic')
+@push('styles')
+<style>
+.dashboard-wrap{max-width:1280px;margin:0 auto;padding:32px 20px}
+.welcome-banner{background:linear-gradient(135deg,var(--navy) 0%,#003580 100%);border-radius:var(--radius-lg);padding:32px 40px;margin-bottom:28px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.welcome-title{font-size:26px;font-weight:800;margin-bottom:6px}
+.welcome-sub{font-size:14px;color:rgba(255,255,255,.7)}
+.role-badge{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px}
+.quick-card{background:#fff;border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);padding:24px;transition:all .25s;border-top:4px solid var(--blue)}
+.quick-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.qc-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.qc-title{font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:6px}
+.qc-desc{font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.5}
+.qc-link{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1.5px solid currentColor;transition:all .2s}
+.activity-card{background:#fff;border-radius:var(--radius-lg);border:1.5px solid var(--gray-200);overflow:hidden}
+.activity-head{padding:18px 24px;border-bottom:1px solid var(--gray-200);font-size:15px;font-weight:700;color:var(--gray-800)}
+.activity-body{padding:40px;text-align:center;color:var(--gray-400)}
+.activity-icon{font-size:48px;margin-bottom:16px}
+@media(max-width:768px){.quick-grid{grid-template-columns:1fr}.welcome-banner{flex-direction:column;gap:12px;text-align:center}}
+</style>
+@endpush
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8 border-l-4 border-[#f1c40f]">
-            <div class="p-6 sm:p-10 flex flex-col md:flex-row justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-[#002147]">
-                        Welcome back, <span class="text-blue-600">{{ Auth::user()->name }}</span>!
-                    </h1>
-                    <p class="mt-2 text-gray-600">
-                        Access your study materials, check latest notices, and manage your profile from here.
-                    </p>
-                </div>
-                <div class="mt-6 md:mt-0">
-                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                        <i class="fas fa-user-graduate mr-2"></i> Student Account
-                    </span>
-                </div>
-            </div>
+<div class="dashboard-wrap">
+    <div class="welcome-banner">
+        <div>
+            <div class="welcome-title">Welcome back, {{ Auth::user()->name }}! 👋</div>
+            <div class="welcome-sub">Access your study materials and stay on top of your academics.</div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-300 border-t-4 border-blue-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <span class="text-gray-400 text-sm">Repository</span>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Study Materials</h3>
-                <p class="text-gray-500 text-sm mb-4">Browse lecture notes, assignments, and lab manuals for your semester.</p>
-                <a href="{{ route('materials.index') }}" class="inline-block w-full text-center py-2 px-4 border border-blue-500 text-blue-500 font-semibold rounded hover:bg-blue-50 transition">
-                    Browse Files
-                </a>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-300 border-t-4 border-green-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="h-12 w-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
-                        <i class="fas fa-id-card"></i>
-                    </div>
-                    <span class="text-gray-400 text-sm">Account</span>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">My Profile</h3>
-                <p class="text-gray-500 text-sm mb-4">Update your personal details, password, and contact information.</p>
-                <a href="#" class="inline-block w-full text-center py-2 px-4 border border-green-500 text-green-500 font-semibold rounded hover:bg-green-50 transition">
-                    Edit Profile
-                </a>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-300 border-t-4 border-purple-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="h-12 w-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <span class="text-gray-400 text-sm">Updates</span>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">College Notices</h3>
-                <p class="text-gray-500 text-sm mb-4">Check recent announcements regarding exams and holidays.</p>
-                <a href="#" class="inline-block w-full text-center py-2 px-4 border border-purple-500 text-purple-500 font-semibold rounded hover:bg-purple-50 transition">
-                    View Notices
-                </a>
-            </div>
+        <div>
+            <span class="role-badge" style="background:rgba(241,196,15,.15);border:1px solid var(--gold);color:var(--gold)">
+                <i class="fas fa-user-graduate"></i> Student Account
+            </span>
         </div>
+    </div>
 
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-gray-800">
-                    <i class="fas fa-history mr-2 text-gray-400"></i> Recent Activity
-                </h3>
-            </div>
-            <div class="p-6">
-                <div class="text-center py-8">
-                    <div class="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400 text-2xl">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900">No recent activity</h3>
-                    <p class="mt-1 text-gray-500">You haven't downloaded any materials yet.</p>
-                    <div class="mt-6">
-                        <a href="{{ route('materials.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#002147] hover:bg-[#003366]">
-                            <i class="fas fa-search mr-2"></i> Find Materials
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <div class="quick-grid">
+        <div class="quick-card" style="border-top-color:#1a56db">
+            <div class="qc-icon" style="background:#dbeafe;color:#1a56db"><i class="fas fa-book-open"></i></div>
+            <div class="qc-title">Study Materials</div>
+            <div class="qc-desc">Browse lecture notes, assignments, and lab manuals organized by department and semester.</div>
+            <a href="{{ route('materials.index') }}" class="qc-link" style="color:#1a56db">Browse Files <i class="fas fa-arrow-right"></i></a>
         </div>
+        <div class="quick-card" style="border-top-color:#10b981">
+            <div class="qc-icon" style="background:#d1fae5;color:#10b981"><i class="fas fa-file-alt"></i></div>
+            <div class="qc-title">Previous Year Questions</div>
+            <div class="qc-desc">Access previous year exam papers to help prepare for your upcoming examinations.</div>
+            <a href="{{ route('materials.index', ['material_type' => 'previous_year_question']) }}" class="qc-link" style="color:#10b981">View PYQs <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="quick-card" style="border-top-color:#8b5cf6">
+            <div class="qc-icon" style="background:#ede9fe;color:#8b5cf6"><i class="fas fa-list-alt"></i></div>
+            <div class="qc-title">Syllabus</div>
+            <div class="qc-desc">View the complete syllabus for all departments and semesters in one place.</div>
+            <a href="{{ route('materials.index', ['material_type' => 'syllabus']) }}" class="qc-link" style="color:#8b5cf6">View Syllabus <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
 
+    <div class="activity-card">
+        <div class="activity-head"><i class="fas fa-history" style="color:var(--gray-400)"></i> Recent Activity</div>
+        <div class="activity-body">
+            <div class="activity-icon">📋</div>
+            <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--gray-600)">No recent activity yet</div>
+            <div style="font-size:14px;margin-bottom:20px">Start browsing materials to see your activity here.</div>
+            <a href="{{ route('materials.index') }}" class="btn btn-blue" style="padding:10px 24px">
+                <i class="fas fa-search"></i> Find Materials
+            </a>
+        </div>
     </div>
 </div>
 @endsection

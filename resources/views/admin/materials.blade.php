@@ -1,30 +1,23 @@
 @extends('layouts.admin')
-
 @section('title', 'Manage Materials')
-
 @section('content')
-<div class="top-bar">
-    <h1 style="margin:0; color:#333;">Manage Materials</h1>
-    <span style="color:#666;">Welcome, {{ auth()->user()->name }}</span>
-</div>
 
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0; color:#333;">All Materials</h2>
-        <button class="btn-primary modal-trigger" data-modal="addMaterialModal">
+    <div class="card-header">
+        <div class="card-title">All Materials</div>
+        <button class="btn btn-gold" data-modal="addMaterialModal">
             <i class="fas fa-plus"></i> Upload Material
         </button>
     </div>
-
-    <table class="data-table" style="width:100%;">
+    <table class="data-table">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>#</th>
                 <th>Name</th>
                 <th>Institute</th>
                 <th>Department</th>
-                <th>Semester</th>
-                <th>Uploaded By</th>
+                <th>Sem</th>
+                <th>Uploader</th>
                 <th>Views</th>
                 <th>Downloads</th>
                 <th>Date</th>
@@ -32,208 +25,182 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($materials as $material)
+            @foreach($materials as $m)
                 <tr>
-                    <td>{{ $material->id }}</td>
+                    <td style="color:#9a9890; font-family:'DM Mono',monospace; font-size:12px;">{{ $m->id }}</td>
                     <td>
-                        <a href="{{ route('materials.show', $material) }}"
-                           style="color:#667eea; text-decoration:none;">
-                            {{ $material->name }}
+                        <a href="{{ route('materials.show', $m) }}" style="color:#0a1628; font-weight:600; text-decoration:none; font-size:13px;">
+                            {{ Str::limit($m->name, 30) }}
                         </a>
                     </td>
-                    <td>{{ $material->institute->name }}</td>
-                    <td>{{ $material->department->name }}</td>
-                    <td>{{ $material->semester }}</td>
-                    <td>{{ $material->uploader->name }}</td>
-                    <td>{{ $material->views }}</td>
-                    <td>{{ $material->downloads }}</td>
-                    <td>{{ $material->created_at->format('M d, Y') }}</td>
+                    <td style="font-size:12px; color:#6b6960;">{{ Str::limit($m->institute->name ?? '—', 20) }}</td>
+                    <td style="font-size:12px; color:#6b6960;">{{ $m->department->name ?? '—' }}</td>
+                    <td><span class="badge badge-faculty">{{ $m->semester }}</span></td>
+                    <td style="font-size:12px;">{{ $m->uploader->name ?? '—' }}</td>
+                    <td style="font-family:'DM Mono',monospace; font-size:12px;">{{ $m->views }}</td>
+                    <td style="font-family:'DM Mono',monospace; font-size:12px;">{{ $m->downloads }}</td>
+                    <td style="color:#9a9890; font-size:12px;">{{ $m->created_at->format('d M Y') }}</td>
                     <td>
-                        <button type="button" class="btn-edit-material"
-                                style="background:#3498db; color:white; border:none;
-                                       padding:6px 12px; border-radius:4px; cursor:pointer;
-                                       font-size:12px; margin-right:4px;"
-                                data-id="{{ $material->id }}"
-                                data-name="{{ $material->name }}"
-                                data-institute-id="{{ $material->institute_id }}"
-                                data-department-id="{{ $material->department_id }}"
-                                data-semester="{{ $material->semester }}"
-                                data-description="{{ $material->description ?? '' }}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <form action="{{ route('admin.materials.delete', $material->id) }}"
-                              method="POST" style="display:inline;"
-                              onsubmit="return confirm('Delete this material permanently?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-danger">
-                                <i class="fas fa-trash"></i> Delete
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-edit btn-sm btn-open-edit"
+                                data-id="{{ $m->id }}"
+                                data-name="{{ $m->name }}"
+                                data-institute-id="{{ $m->institute_id }}"
+                                data-department-id="{{ $m->department_id }}"
+                                data-semester="{{ $m->semester }}"
+                                data-description="{{ $m->description ?? '' }}">
+                                <i class="fas fa-edit"></i>
                             </button>
-                        </form>
+                            <form action="{{ route('admin.materials.delete', $m->id) }}" method="POST" onsubmit="return confirm('Delete?');">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-
     <div style="margin-top:20px;">{{ $materials->links() }}</div>
 </div>
 
-{{-- ── Add Material Modal ── --}}
+{{-- Add Modal --}}
 <div id="addMaterialModal" class="modal">
-    <div class="modal-content">
-        <span class="close close-modal">&times;</span>
-        <h2 style="margin-top:0; color:#333;">Upload New Material</h2>
+    <div class="modal-box">
+        <div class="modal-head">
+            <span class="title">Upload Material</span>
+            <button class="modal-close">&times;</button>
+        </div>
         <form action="{{ route('materials.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="form-group">
-                <label>Material Name *</label>
-                <input type="text" name="name" required>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Material Name *</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Institute *</label>
+                        <select name="institute_id" class="form-control" id="add_institute" required>
+                            <option value="">Select...</option>
+                            @foreach(\App\Models\Institute::all() as $inst)
+                                <option value="{{ $inst->id }}">{{ $inst->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <select name="department_id" class="form-control" id="add_dept" required>
+                            <option value="">Select Institute first</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="max-width:160px;">
+                    <label>Semester *</label>
+                    <select name="semester" class="form-control" required>
+                        <option value="">—</option>
+                        @for($i=1;$i<=12;$i++) <option value="{{ $i }}">Semester {{ $i }}</option> @endfor
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>File * <small style="color:#9a9890;">(PDF, DOC, DOCX, PPT, PPTX, TXT — Max 10MB)</small></label>
+                    <input type="file" name="file" class="form-control" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="3"></textarea>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Institute *</label>
-                <select name="institute_id" id="add_institute_id" required>
-                    <option value="">Select Institute</option>
-                    @foreach(\App\Models\Institute::all() as $inst)
-                        <option value="{{ $inst->id }}">{{ $inst->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Department *</label>
-                <select name="department_id" id="add_department_id" required>
-                    <option value="">Select Department</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Semester *</label>
-                <select name="semester" required>
-                    <option value="">Select Semester</option>
-                    @for($i=1; $i<=12; $i++)
-                        <option value="{{ $i }}">Semester {{ $i }}</option>
-                    @endfor
-                </select>
-            </div>
-            <div class="form-group">
-                <label>File * (PDF, DOC, DOCX, PPT, PPTX, TXT — Max 10 MB)</label>
-                <input type="file" name="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" rows="3"></textarea>
-            </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button type="button" class="btn-danger close-modal">Cancel</button>
-                <button type="submit" class="btn-primary">Upload</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-gold">Upload</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- ── Edit Material Modal ── --}}
+{{-- Edit Modal --}}
 <div id="editMaterialModal" class="modal">
-    <div class="modal-content">
-        <span class="close close-modal">&times;</span>
-        <h2 style="margin-top:0; color:#333;">Edit Material</h2>
+    <div class="modal-box">
+        <div class="modal-head">
+            <span class="title">Edit Material</span>
+            <button class="modal-close">&times;</button>
+        </div>
         <form id="editMaterialForm" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label>Material Name *</label>
-                <input type="text" name="name" id="edit_name" required>
+            @csrf @method('PUT')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Material Name *</label>
+                    <input type="text" name="name" id="edit_name" class="form-control" required>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Institute *</label>
+                        <select name="institute_id" id="edit_inst" class="form-control" required>
+                            <option value="">Select...</option>
+                            @foreach(\App\Models\Institute::all() as $inst)
+                                <option value="{{ $inst->id }}">{{ $inst->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <select name="department_id" id="edit_dept" class="form-control" required>
+                            <option value="">Select...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="max-width:160px;">
+                    <label>Semester *</label>
+                    <select name="semester" id="edit_sem" class="form-control" required>
+                        <option value="">—</option>
+                        @for($i=1;$i<=12;$i++) <option value="{{ $i }}">Semester {{ $i }}</option> @endfor
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Replace File <small style="color:#9a9890;">(optional)</small></label>
+                    <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" id="edit_desc" class="form-control" rows="3"></textarea>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Institute *</label>
-                <select name="institute_id" id="edit_institute_id" required>
-                    <option value="">Select Institute</option>
-                    @foreach(\App\Models\Institute::all() as $inst)
-                        <option value="{{ $inst->id }}">{{ $inst->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Department *</label>
-                <select name="department_id" id="edit_department_id" required>
-                    <option value="">Select Department</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Semester *</label>
-                <select name="semester" id="edit_semester" required>
-                    <option value="">Select Semester</option>
-                    @for($i=1; $i<=12; $i++)
-                        <option value="{{ $i }}">Semester {{ $i }}</option>
-                    @endfor
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Replace File (optional)</label>
-                <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
-                <small style="color:#666;">Leave empty to keep the current file.</small>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" id="edit_description" rows="3"></textarea>
-            </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button type="button" class="btn-danger close-modal">Cancel</button>
-                <button type="submit" class="btn-primary">Update</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-gold">Update</button>
             </div>
         </form>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
 <script>
-$(document).ready(function () {
-
-    // ── Load departments helper ──────────────────────────────────────────────
-    function loadDepts(instituteId, selectEl, selectedId) {
-        $(selectEl).html('<option value="">Loading…</option>');
-        if (!instituteId) {
-            $(selectEl).html('<option value="">Select Department</option>');
-            return;
-        }
-        $.getJSON('/api/departments', { institute_id: instituteId }, function (data) {
-            var opts = '<option value="">Select Department</option>';
-            $.each(data, function (i, d) {
-                opts += '<option value="' + d.id + '"' +
-                        (d.id == selectedId ? ' selected' : '') + '>' +
-                        d.name + '</option>';
-            });
-            $(selectEl).html(opts);
+function loadDepts(instId, selectEl, selectedId) {
+    $(selectEl).html('<option value="">Loading...</option>');
+    if (!instId) { $(selectEl).html('<option value="">Select Institute first</option>'); return; }
+    $.getJSON('/api/departments', { institute_id: instId }, function(data) {
+        var opts = '<option value="">Select...</option>';
+        $.each(data, function(i, d) {
+            opts += '<option value="' + d.id + '"' + (d.id == selectedId ? ' selected' : '') + '>' + d.name + '</option>';
         });
-    }
-
-    // Add modal — institute change
-    $('#add_institute_id').on('change', function () {
-        loadDepts(this.value, '#add_department_id', null);
+        $(selectEl).html(opts);
     });
+}
+$('#add_institute').on('change', function() { loadDepts(this.value, '#add_dept', null); });
+$('#edit_inst').on('change', function() { loadDepts(this.value, '#edit_dept', null); });
 
-    // Edit modal — institute change
-    $('#edit_institute_id').on('change', function () {
-        loadDepts(this.value, '#edit_department_id', null);
-    });
-
-    // Edit button click
-    $(document).on('click', '.btn-edit-material', function () {
-        var btn    = $(this);
-        var instId = btn.data('institute-id');
-        var deptId = btn.data('department-id');
-
-        $('#edit_name').val(btn.data('name'));
-        $('#edit_institute_id').val(instId);
-        $('#edit_semester').val(btn.data('semester'));
-        $('#edit_description').val(btn.data('description'));
-        $('#editMaterialForm').attr('action', '/admin/materials/' + btn.data('id'));
-
-        // Load departments then set selected dept
-        loadDepts(instId, '#edit_department_id', deptId);
-
-        $('#editMaterialModal').fadeIn(200);
-        $('body').css('overflow', 'hidden');
-    });
+$(document).on('click', '.btn-open-edit', function() {
+    var b = $(this);
+    $('#edit_name').val(b.data('name'));
+    $('#edit_inst').val(b.data('institute-id'));
+    $('#edit_sem').val(b.data('semester'));
+    $('#edit_desc').val(b.data('description'));
+    $('#editMaterialForm').attr('action', '/admin/materials/' + b.data('id'));
+    loadDepts(b.data('institute-id'), '#edit_dept', b.data('department-id'));
+    $('#editMaterialModal').addClass('show');
 });
 </script>
 @endpush

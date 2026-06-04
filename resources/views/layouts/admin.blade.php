@@ -1,290 +1,191 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin Panel') - E-Learning</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    @stack('styles')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Admin') — ICV E-Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--navy:#002147;--gold:#f1c40f;--blue:#1a56db;--red:#e74c3c;--green:#27ae60;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--sidebar-w:260px}
+    body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-800);display:flex;min-height:100vh}
+    a{color:inherit;text-decoration:none}
 
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 250px;
-            position: fixed;
-            left: 0; top: 0;
-            padding-top: 20px;
-            z-index: 100;
-            overflow-y: auto;
-        }
-        .sidebar a {
-            color: white;
-            padding: 15px 20px;
-            display: block;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        .sidebar a:hover, .sidebar a.active {
-            background: rgba(255,255,255,0.2);
-            border-left: 4px solid white;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }
-        .top-bar {
-            background: white;
-            padding: 15px 30px;
-            margin: -20px -20px 20px -20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
-        }
-        .btn-primary:hover { background: #5568d3; color: white; }
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-danger:hover { background: #c0392b; }
-        .btn-success {
-            background: #27ae60;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            overflow-y: auto;
-        }
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            position: relative;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .close:hover { color: black; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .stats-card h3 { font-size: 36px; margin: 10px 0; }
-        .stats-card p  { font-size: 14px; opacity: 0.9; }
-        .alert-success {
-            background: #d4edda; color: #155724;
-            padding: 15px; border-radius: 5px;
-            margin-bottom: 20px; border: 1px solid #c3e6cb;
-        }
-        .alert-danger {
-            background: #f8d7da; color: #721c24;
-            padding: 15px; border-radius: 5px;
-            margin-bottom: 20px; border: 1px solid #f5c6cb;
-        }
-        table.data-table { border-collapse: collapse; }
-        table.data-table thead tr {
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-        }
-        table.data-table th,
-        table.data-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-        table.data-table tbody tr:hover { background: #f8f9fa; }
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);background:var(--navy);min-height:100vh;position:fixed;left:0;top:0;z-index:200;display:flex;flex-direction:column;transition:transform .3s}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .sidebar-logo h2{color:#fff;font-size:16px;font-weight:700;margin-bottom:2px}
+    .sidebar-logo p{color:rgba(255,255,255,.5);font-size:12px}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto}
+    .nav-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);padding:12px 20px 6px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;transition:all .2s;border-left:3px solid transparent}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;border-left-color:rgba(255,255,255,.3)}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--gold)}
+    .nav-item i{width:18px;font-size:15px}
+    .sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1)}
+    .logout-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;background:rgba(231,76,60,.15);border:none;border-radius:8px;color:rgba(255,255,255,.8);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+    .logout-btn:hover{background:rgba(231,76,60,.3);color:#fff}
+
+    /* Main */
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .topbar-title{font-size:20px;font-weight:700;color:var(--gray-800)}
+    .topbar-user{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--gray-600)}
+    .topbar-avatar{width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+    .page-body{padding:28px;flex:1}
+
+    /* Cards */
+    .card{background:#fff;border-radius:12px;border:1.5px solid var(--gray-200);overflow:hidden;margin-bottom:20px}
+    .card-head{padding:18px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}
+    .card-title{font-size:15px;font-weight:700}
+    .card-body{padding:24px}
+
+    /* Flash */
+    .flash{padding:12px 16px;margin-bottom:16px;border-radius:8px;border-left:4px solid;font-size:14px}
+    .flash-success{background:#d4edda;border-color:var(--green);color:#155724}
+    .flash-error{background:#f8d7da;border-color:var(--red);color:#721c24}
+
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+    .stat-card{background:#fff;border-radius:12px;padding:20px;border:1.5px solid var(--gray-200);border-top:4px solid var(--blue)}
+    .stat-num{font-size:28px;font-weight:800;color:var(--gray-800);margin-bottom:4px}
+    .stat-label{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px}
+    .stat-icon{font-size:20px;margin-bottom:10px}
+
+    /* Table */
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th{padding:11px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-500);background:var(--gray-50);border-bottom:1.5px solid var(--gray-200)}
+    .data-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--gray-100);vertical-align:middle}
+    .data-table tbody tr:hover{background:var(--gray-50)}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .badge-admin{background:#fee2e2;color:#991b1b}
+    .badge-faculty{background:#dbeafe;color:#1e40af}
+    .badge-student{background:#d1fae5;color:#065f46}
+    .badge-active{background:#d1fae5;color:#065f46}
+    .badge-inactive{background:#fee2e2;color:#991b1b}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+    .btn-sm{padding:5px 10px;font-size:11px}
+    .btn-primary{background:var(--navy);color:#fff}
+    .btn-primary:hover{background:#001630}
+    .btn-success{background:var(--green);color:#fff}
+    .btn-success:hover{background:#219150}
+    .btn-danger{background:var(--red);color:#fff}
+    .btn-danger:hover{background:#c0392b}
+    .btn-warning{background:#f59e0b;color:#fff}
+    .btn-info{background:var(--blue);color:#fff}
+    .btn-outline{background:transparent;border:1.5px solid var(--gray-200);color:var(--gray-600)}
+    .btn-outline:hover{border-color:var(--gray-400);color:var(--gray-800)}
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:20px}
+    .modal.open{display:flex}
+    .modal-box{background:#fff;border-radius:12px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal-head{padding:20px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}
+    .modal-head h3{font-size:16px;font-weight:700}
+    .modal-body{padding:24px}
+    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-400);line-height:1}
+    .modal-close:hover{color:var(--gray-800)}
+
+    /* Forms */
+    .form-group{margin-bottom:18px}
+    .form-label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+    .form-control{width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;outline:none;transition:border-color .2s}
+    .form-control:focus{border-color:var(--navy)}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     </style>
+    @stack('styles')
 </head>
 <body>
 
-    {{-- ── Sidebar ── --}}
-    <div class="sidebar">
-        <div style="padding: 0 20px 30px; border-bottom: 1px solid rgba(255,255,255,0.2);">
-            <h2 style="color:white; margin:0; font-size:22px;">
-                <i class="fas fa-graduation-cap"></i> Admin Panel
-            </h2>
-        </div>
-
-        <a href="{{ route('admin.dashboard') }}"
-           class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <h2><i class="fas fa-graduation-cap" style="color:var(--gold)"></i> Admin Panel</h2>
+        <p>ICV Polytechnic</p>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <i class="fas fa-tachometer-alt"></i> Dashboard
         </a>
-        <a href="{{ route('admin.materials') }}"
-           class="{{ request()->routeIs('admin.materials') ? 'active' : '' }}">
+        <a href="{{ route('admin.analytics') }}" class="nav-item {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+            <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+        <div class="nav-group-label" style="margin-top:8px">Management</div>
+        <a href="{{ route('admin.materials') }}" class="nav-item {{ request()->routeIs('admin.materials') ? 'active' : '' }}">
             <i class="fas fa-book"></i> Materials
         </a>
-        <a href="{{ route('admin.users') }}"
-           class="{{ request()->routeIs('admin.users') ? 'active' : '' }}">
+        <a href="{{ route('admin.users') }}" class="nav-item {{ request()->routeIs('admin.users') ? 'active' : '' }}">
             <i class="fas fa-users"></i> Users
         </a>
-        <a href="{{ route('admin.institutes') }}"
-           class="{{ request()->routeIs('admin.institutes') ? 'active' : '' }}">
+        <a href="{{ route('admin.institutes') }}" class="nav-item {{ request()->routeIs('admin.institutes') ? 'active' : '' }}">
             <i class="fas fa-university"></i> Institutes
         </a>
-        <a href="{{ route('admin.departments') }}"
-           class="{{ request()->routeIs('admin.departments') ? 'active' : '' }}">
+        <a href="{{ route('admin.departments') }}" class="nav-item {{ request()->routeIs('admin.departments') ? 'active' : '' }}">
             <i class="fas fa-building"></i> Departments
         </a>
-
-        <a href="{{ url('/') }}"
-           style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.2); padding-top:20px;">
-            <i class="fas fa-home"></i> Back to Site
+        <div class="nav-group-label" style="margin-top:8px">Site</div>
+        <a href="{{ url('/') }}" class="nav-item" target="_blank">
+            <i class="fas fa-external-link-alt"></i> View Site
         </a>
-
-        <form method="POST" action="{{ route('logout') }}" style="padding:15px 20px;">
+        <a href="{{ route('materials.index') }}" class="nav-item">
+            <i class="fas fa-book-open"></i> Materials Portal
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit"
-                    style="background:rgba(255,255,255,0.2); color:white; border:none;
-                           padding:10px 15px; border-radius:5px; width:100%; cursor:pointer;">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
         </form>
     </div>
+</aside>
 
-    {{-- ── Main Content ── --}}
-    <div class="main-content">
-
-        {{-- Flash messages --}}
-        @if(session('success'))
-            <div class="alert-success">{{ session('success') }}</div>
-        @endif
-        @if(session('error'))
-            <div class="alert-danger">{{ session('error') }}</div>
-        @endif
-        @if($errors->any())
-            <div class="alert-danger">
-                <ul style="margin:0; padding-left:20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+<div class="main">
+    <header class="topbar">
+        <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
+        <div class="topbar-user">
+            <div class="topbar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+            <div>
+                <div style="font-weight:600;color:var(--gray-800)">{{ auth()->user()->name }}</div>
+                <div style="font-size:11px;color:var(--red)">Administrator</div>
             </div>
+        </div>
+    </header>
+
+    <div class="page-body">
+        @if(session('success'))<div class="flash flash-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
+        @if(session('error'))<div class="flash flash-error"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>@endif
+        @if($errors->any())
+        <div class="flash flash-error">
+            @foreach($errors->all() as $e)<div><i class="fas fa-times-circle"></i> {{ $e }}</div>@endforeach
+        </div>
         @endif
 
         @yield('content')
     </div>
+</div>
 
-    {{-- ── Scripts ── --}}
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(document).ready(function () {
-
-            // DataTables init
-            $('.data-table').each(function () {
-                if (!$.fn.dataTable.isDataTable(this)) {
-                    $(this).DataTable({
-                        pageLength: 25,
-                        order: [[0, 'desc']],
-                        language: {
-                            search: 'Search:',
-                            lengthMenu: 'Show _MENU_ entries',
-                            info: 'Showing _START_ to _END_ of _TOTAL_ entries',
-                            infoEmpty: 'No entries found',
-                            infoFiltered: '(filtered from _MAX_ total entries)',
-                        },
-                    });
-                }
-            });
-
-            // Modal open
-            $(document).on('click', '.modal-trigger', function () {
-                var modalId = $(this).data('modal');
-                $('#' + modalId).fadeIn(200);
-                $('body').css('overflow', 'hidden');
-            });
-
-            // Modal close button
-            $(document).on('click', '.close-modal', function () {
-                $(this).closest('.modal').fadeOut(200);
-                $('body').css('overflow', '');
-            });
-
-            // Modal close on backdrop click
-            $(document).on('click', '.modal', function (e) {
-                if ($(e.target).hasClass('modal')) {
-                    $(this).fadeOut(200);
-                    $('body').css('overflow', '');
-                }
-            });
-        });
-    </script>
-    @stack('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+// Modal helpers
+document.querySelectorAll('[data-modal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const id = btn.dataset.modal;
+        document.getElementById(id)?.classList.add('open');
+    });
+});
+document.querySelectorAll('.modal-close, .modal-backdrop').forEach(el => {
+    el.addEventListener('click', () => el.closest('.modal')?.classList.remove('open'));
+});
+document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+</script>
+@stack('scripts')
 </body>
 </html>
