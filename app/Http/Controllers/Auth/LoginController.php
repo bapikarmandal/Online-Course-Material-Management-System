@@ -24,7 +24,12 @@ class LoginController extends Controller
             return redirect()->route('login')
                              ->withErrors(['email' => 'Your account has been deactivated. Contact admin.']);
         }
-        $user->update(['last_login_at' => now()]);
+        $user->update([
+            'last_login_at' => now(),
+            'last_activity_at' => now(),
+            'last_login_ip' => $request->ip(),
+            'login_count' => $user->login_count + 1
+        ]);
 
         // Redirect by role
         if ($user->isAdmin())   return redirect()->route('admin.dashboard');

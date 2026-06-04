@@ -49,13 +49,14 @@ Route::middleware(['auth', 'user-role:faculty'])->prefix('faculty')->name('facul
 });
 
 // Public material routes
-Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
-Route::get('/materials/{material}', [MaterialController::class, 'show'])->name('materials.show');
-Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
+
 Route::middleware('auth')->group(function () {
     Route::get('/materials/create', [MaterialController::class, 'create'])->name('materials.create');
     Route::post('/materials', [MaterialController::class, 'store'])->name('materials.store');
     Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
+    Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
+    Route::get('/materials/{material}', [MaterialController::class, 'show'])->name('materials.show');
+    Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
 });
 
 // API

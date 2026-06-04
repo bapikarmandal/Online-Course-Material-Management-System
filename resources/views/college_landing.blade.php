@@ -173,7 +173,7 @@
         </div>
         <div class="campus-grid">
             <div class="campus-img">
-                <img src="/images/campus-life.jpg" alt="Campus" onerror="this.src='https://via.placeholder.com/600x400?text=ICV+Campus'">
+                <img src="/images/campus-image.jpg" alt="Campus" onerror="this.src='https://via.placeholder.com/600x400?text=ICV+Campus'">
             </div>
             <div class="campus-features">
                 @foreach([
